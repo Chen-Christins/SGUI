@@ -1,9 +1,11 @@
 #include <string>
 #include <memory>
-#include "raylib.h"
-#include "SGUI/State.h"
-#include "SGUI/Widget.h"
-#include "SGUI/Compose.h"
+
+#include <raylib.h>
+
+#include "core/state.h"
+#include "core/widget.h"
+#include "core/compose.h"
 
 using namespace sgui;
 

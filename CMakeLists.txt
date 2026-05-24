@@ -6,27 +6,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+include(cmake/dependencies.cmake)
 
-# Fetch raylib for rendering
-# Add policy bypass for Raylib 5.0 CMake requirement error
-set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
-
-include(FetchContent)
-FetchContent_Declare(
-  raylib
-  GIT_REPOSITORY https://gitee.com/mirrors/raylib.git
-  GIT_TAG 5.0 # Use stable 5.0 release
-  GIT_SHALLOW ON # Make cloning much faster
+# Add the SGUI library
+add_library(sgui STATIC
+    src/core/widget.cc
 )
-set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(raylib)
 
-add_executable(main 
+target_include_directories(sgui PUBLIC src)
+target_link_libraries(sgui PUBLIC raylib)
+
+add_executable(main
     src/main.cpp
 )
 
-target_include_directories(main PUBLIC include)
-target_link_libraries(main PRIVATE raylib)
+target_link_libraries(main PRIVATE sgui)
 
+set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)

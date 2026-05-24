@@ -30,7 +30,7 @@ jobs:
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
-        run: cmake --build build --config ${{ matrix.build_type }}
+        run: cmake --build build --target sgui --config ${{ matrix.build_type }}
 
       - name: Set package name
         id: name
@@ -42,15 +42,47 @@ jobs:
             VERSION="latest"
           fi
           OS=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
-          echo "pkg=SGUI-${VERSION}-${OS}" >> $GITHUB_OUTPUT
+          echo "pkg=SGUI-Framework-${VERSION}-${OS}" >> $GITHUB_OUTPUT
 
       - name: Package (Linux/macOS)
         if: runner.os != 'Windows'
-        run: zip "${{ steps.name.outputs.pkg }}.zip" bin/main
+        shell: bash
+        run: |
+          mkdir -p pkg/include pkg/lib
+
+          # Copy all headers preserving directory structure under src/
+          find src -name '*.h' | while read f; do
+            dst="pkg/include/${f#src/}"
+            mkdir -p "$(dirname "$dst")"
+            cp "$f" "$dst"
+          done
+
+          # Copy static library (handle both single and multi-config output paths)
+          cp lib/libsgui.a pkg/lib/ 2>/dev/null || \
+          cp lib/Release/libsgui.a pkg/lib/ 2>/dev/null || \
+          { echo "ERROR: static library not found"; exit 1; }
+
+          cd pkg && zip -r "../${{ steps.name.outputs.pkg }}.zip" .
 
       - name: Package (Windows)
         if: runner.os == 'Windows'
-        run: Compress-Archive -Path bin/Release/main.exe -DestinationPath "${{ steps.name.outputs.pkg }}.zip"
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path pkg/include, pkg/lib | Out-Null
+
+          # Copy all headers preserving directory structure under src/
+          Get-ChildItem -Path src -Recurse -Filter *.h | ForEach-Object {
+            $dst = "pkg/include/$($_.FullName.Substring($PWD.Path.Length + 5))"
+            New-Item -ItemType Directory -Force -Path (Split-Path $dst) | Out-Null
+            Copy-Item $_.FullName $dst
+          }
+
+          # Copy static library (handle both single and multi-config output paths)
+          if (Test-Path lib/sgui.lib)           { Copy-Item lib/sgui.lib pkg/lib/ }
+          elseif (Test-Path lib/Release/sgui.lib) { Copy-Item lib/Release/sgui.lib pkg/lib/ }
+          else { throw "Static library not found" }
+
+          Compress-Archive -Path pkg/* -DestinationPath "${{ steps.name.outputs.pkg }}.zip"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -70,7 +102,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: SGUI-${{ github.ref_name }}-*
+          pattern: SGUI-Framework-${{ github.ref_name }}-*
           merge-multiple: true
           path: artifacts
 
