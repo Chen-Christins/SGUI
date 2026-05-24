@@ -6,50 +6,140 @@
 #include <core/state.h>
 #include <core/widget.h>
 #include <core/compose.h>
+#include <core/remember.h>
+#include <core/composition_local.h>
 
 using namespace sgui;
 
-// A composable function that builds UI based on state
-std::shared_ptr<Widget> App(State<int>& counterState) {
+// A composable function that builds the full UI tree
+std::shared_ptr<Widget> App(State<int>& counter, CompositionContext& ctx) {
+    // Local mutable state — triggers rebuild when set() is called
+    auto& localCount = ctx.rememberState<int>([]() { return 0; });
+
+    // Focus coordination for text fields
+    auto& focusedId = ctx.rememberState<int>([]() { return -1; });
+
+    // Text field states
+    auto& nameState = ctx.rememberState<std::string>([]() { return std::string(""); });
+
+    // Checkbox state
+    auto& darkMode = ctx.rememberState<bool>([]() { return false; });
+
+    // Derived label text — recomputed only when counter changes
+    static auto label = derivedStateOf([&]() {
+        return "Counter value is: " + std::to_string(counter.get());
+    });
+    label.dependsOn(counter);
+
     return column({
-        text("Hello, SGUI Reactive Framework!"),
-        text("Counter value is: " + std::to_string(counterState.get())),
-        button("Increment", [&]() { 
-            counterState.set(counterState.get() + 1); 
-        }),
-        button("Decrement", [&]() { 
-            counterState.set(counterState.get() - 1); 
-        })
+        // Rounded background title bar
+        text("SGUI Reactive Framework", Modifier()
+            .padding(16)
+            .background(BLUE, 8)
+            .fillMaxWidth()),
+
+        text(label.get(), Modifier()
+            .padding(8)),
+
+        // Border-style button row
+        row({
+            button("Increment", [&]() {
+                counter.set(counter.get() + 1);
+            }, Modifier()
+                .padding(4)
+                .size(120, 40)
+                .background(GRAY, 4)
+                .border(2, DARKGRAY)),
+
+            spacer(),
+
+            button("Decrement", [&]() {
+                counter.set(counter.get() - 1);
+            }, Modifier()
+                .padding(4)
+                .size(120, 40)
+                .background(GRAY, 4)
+                .border(2, DARKGRAY)),
+        }, 10, Modifier().padding(8)),
+
+        // Offset demo: hint text slightly shifted
+        text("(buttons have rounded border)", Modifier()
+            .padding(4)
+            .offset(10, 0)),
+
+        // Box with border
+        box({
+            text("Box Background", Modifier()
+                .background(LIGHTGRAY, 4)
+                .border(2, GRAY)
+                .size(260, 60)),
+
+            text("Box Foreground", Modifier()
+                .padding(4)),
+        }, Modifier().padding(8)),
+
+        row({
+            text("Local: " + std::to_string(localCount.get()), Modifier()
+                .padding(4)),
+
+            button("Local +", [&]() {
+                localCount.set(localCount.get() + 1);
+            }, Modifier()
+                .padding(4)
+                .border(1, DARKGRAY)),
+        }, 10, Modifier().padding(8)),
+
+        // Checkbox demo
+        checkbox(darkMode, "Dark Mode", Modifier()
+            .padding(8)),
+
+        text(darkMode.get() ? "Dark mode is ON" : "Dark mode is OFF", Modifier()
+            .padding(4)
+            .offset(28, 0)),
+
+        // CompositionLocal demo: provides RED color for the subtree
+        LocalTextColor.provides(RED,
+            text("This text is wrapped in CompositionLocal(RED)", Modifier()
+                .padding(8))
+        ),
+
+        // TextField demo
+        text("Name Input:", Modifier()
+            .padding(8)),
+
+        textField(focusedId, 1, nameState, ctx, "Enter your name...", Modifier()
+            .padding(8)),
+
+        text("Hello, " + nameState.get() + "!", Modifier()
+            .padding(8)),
     });
 }
 
 int main() {
-    // Initialize the Raylib window
-    InitWindow(800, 600, "SGUI - Reactive C++ UI");
+    InitWindow(800, 800, "SGUI - Reactive C++ UI");
     SetTargetFPS(60);
 
-    // Application State
     State<int> counter(0);
     std::shared_ptr<Widget> currentUiTree;
+    CompositionContext compCtx;
 
-    // When state changes, re-evaluate the UI component tree
-    counter.observe([&](const int& val){
-        currentUiTree = App(counter);
-    });
+    auto rebuild = [&]() {
+        compCtx.reset();
+        currentUiTree = App(counter, compCtx);
+    };
 
-    // Main game/UI loop
+    // Wire up the CompositionContext to trigger rebuild on local state changes
+    compCtx.setInvalidate(rebuild);
+    counter.observe([&](const int&) { rebuild(); });
+
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
-        // Create a render context with initial padding
-        RenderContext ctx = { 50, 50 };
-        
-        // Keep the current tree alive during the entire render,
-        // even if an observer replaces currentUiTree mid-render (e.g. on button click).
+        RenderContext renderCtx = { 50, 50, 700, 550 };
         auto uiTree = currentUiTree;
         if (uiTree) {
-            uiTree->render(ctx);
+            uiTree->render(renderCtx);
         }
 
         EndDrawing();

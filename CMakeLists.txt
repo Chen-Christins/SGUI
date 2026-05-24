@@ -7,6 +7,10 @@ include(cmake/dependencies.cmake)
 # Add the SGUI library
 add_library(sgui STATIC
     src/core/widget.cc
+    src/core/modifier.cc
+    src/core/layout.cc
+    src/core/text_field.cc
+    src/core/checkbox.cc
 )
 
 target_include_directories(sgui PUBLIC src)
