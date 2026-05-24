@@ -57,10 +57,12 @@ jobs:
             cp "$f" "$dst"
           done
 
-          # Copy sgui static library
-          cp lib/libsgui.a pkg/lib/ 2>/dev/null || \
-          cp lib/Release/libsgui.a pkg/lib/ 2>/dev/null || \
-          { echo "ERROR: libsgui.a not found"; exit 1; }
+          # Copy sgui static library (lib/ or build/ as fallback)
+          SGUI_LIB=$(find lib build -name "libsgui.a" -not -path "*/CMakeFiles/*" | head -1)
+          if [ -z "$SGUI_LIB" ]; then
+            echo "ERROR: libsgui.a not found"; exit 1
+          fi
+          cp "$SGUI_LIB" pkg/lib/
 
           # Copy raylib static library from build tree
           RAYLIB_LIB=$(find build/_deps -name "libraylib.a" -not -path "*/CMakeFiles/*" | head -1)
@@ -81,15 +83,20 @@ jobs:
             Copy-Item $_.FullName $dst
           }
 
-          # Copy sgui static library
-          if (Test-Path lib/sgui.lib)           { Copy-Item lib/sgui.lib pkg/lib/ }
-          elseif (Test-Path lib/Release/sgui.lib) { Copy-Item lib/Release/sgui.lib pkg/lib/ }
-          else { throw "sgui.lib not found" }
+          # Copy sgui static library (lib/ or build/ as fallback)
+          $sgui = Get-ChildItem -Path lib, build -Recurse -Name "sgui.lib" |
+                    Where-Object { $_ -notmatch "CMakeFiles" } | Select-Object -First 1
+          if (-not $sgui) { throw "sgui.lib not found" }
+          if ($sgui.StartsWith("lib")) { Copy-Item $sgui pkg/lib/ }
+          else { Copy-Item "build/$sgui" pkg/lib/ }
 
           # Copy raylib static library from build tree
           $raylib = Get-ChildItem -Path build/_deps -Recurse -Name "raylib.lib" |
                     Where-Object { $_ -notmatch "CMakeFiles" } | Select-Object -First 1
+          if (-not $raylib) { throw "raylib.lib not found" }
           Copy-Item "build/_deps/$raylib" pkg/lib/
+
+          Compress-Archive -Path pkg/* -DestinationPath "${{ steps.name.outputs.pkg }}.zip"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
