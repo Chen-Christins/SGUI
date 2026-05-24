@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  push:
+    branches: [master, feature/*]
+    tags: ['*']
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        build_type: [Release]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            libx11-dev libxrandr-dev libxinerama-dev \
+            libxcursor-dev libxi-dev libgl1-mesa-dev
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.build_type }}
+
+      - name: Set package name
+        id: name
+        shell: bash
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            VERSION="latest"
+          fi
+          OS=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
+          echo "pkg=SGUI-${VERSION}-${OS}" >> $GITHUB_OUTPUT
+
+      - name: Package (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          cd build
+          zip "../${{ steps.name.outputs.pkg }}.zip" SGUI
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          cd build
+          Compress-Archive -Path Release/SGUI.exe -DestinationPath "../${{ steps.name.outputs.pkg }}.zip"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.name.outputs.pkg }}
+          path: ${{ steps.name.outputs.pkg }}.zip
+
+  release-tag:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: SGUI-${{ github.ref_name }}-*
+          merge-multiple: true
+          path: artifacts
+
+      - name: Extract changelog
+        id: changelog
+        run: |
+          TAG="${{ github.ref_name }}"
+          BODY=$(awk -v tag="$TAG" '
+            BEGIN { found = 0; output = "" }
+            $0 ~ "^## \\[" tag "\\]" { found = 1; next }
+            found && /^## \[/ { exit }
+            found { output = output $0 "\n" }
+            END { print output }
+          ' CHANGELOG.md)
+          BODY=$(echo "$BODY" | sed -e '/./,$!d' -e :a -e '/^\n*$/{$d;N;ba' -e '}')
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$BODY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create draft release
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --draft \
+            --title "${{ github.ref_name }}" \
+            --notes "${{ steps.changelog.outputs.body }}" \
+            artifacts/*
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  release-latest:
+    if: github.ref == 'refs/heads/master'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: SGUI-latest-*
+          merge-multiple: true
+          path: artifacts
+
+      - name: Update latest release
+        run: |
+          gh release delete latest --yes --cleanup-tag 2>/dev/null || true
+          gh release create latest \
+            --prerelease \
+            --title "Latest (master)" \
+            --notes "Automated build from the latest master branch." \
+            artifacts/*
+        env:
+          GH_TOKEN: ${{ github.token }}
