@@ -2,6 +2,8 @@
 
 A lightweight, reactive UI framework for C++17, built on [raylib](https://www.raylib.com/). SGUI brings a declarative, state-driven component model to native GUI development.
 
+SGUI stands for **S**calpel GUI — a framework designed to cut through complexity with surgical precision.
+
 ## Features
 
 - **Reactive State** — `State<T>` container automatically rebuilds the UI when data changes
@@ -32,7 +34,7 @@ sudo apt install libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-d
 ```bash
 cmake -B build
 cmake --build build
-./build/SGUI
+./bin/main
 ```
 
 ## Example

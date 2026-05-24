@@ -22,9 +22,11 @@ set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(raylib)
 
-add_executable(SGUI 
+add_executable(main 
     src/main.cpp
 )
 
-target_include_directories(SGUI PUBLIC include)
-target_link_libraries(SGUI PRIVATE raylib)
+target_include_directories(main PUBLIC include)
+target_link_libraries(main PRIVATE raylib)
+
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)

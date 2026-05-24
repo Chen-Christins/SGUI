@@ -46,15 +46,11 @@ jobs:
 
       - name: Package (Linux/macOS)
         if: runner.os != 'Windows'
-        run: |
-          cd build
-          zip "../${{ steps.name.outputs.pkg }}.zip" SGUI
+        run: zip "${{ steps.name.outputs.pkg }}.zip" bin/main
 
       - name: Package (Windows)
         if: runner.os == 'Windows'
-        run: |
-          cd build
-          Compress-Archive -Path Release/SGUI.exe -DestinationPath "../${{ steps.name.outputs.pkg }}.zip"
+        run: Compress-Archive -Path bin/Release/main.exe -DestinationPath "${{ steps.name.outputs.pkg }}.zip"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
