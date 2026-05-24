@@ -9,16 +9,13 @@ namespace sgui {
 
 // Reactive mutable state that triggers invalidate on set().
 // Designed to be stored in CompositionContext::rememberState().
-template<typename T>
+template <typename T>
 class MutableState {
 public:
     MutableState(T initial, std::shared_ptr<std::function<void()>> onInvalidate)
-        : value_(std::move(initial)), onInvalidate_(std::move(onInvalidate)) {
-    }
+        : value_(std::move(initial)), onInvalidate_(std::move(onInvalidate)) {}
 
-    const T& get() const {
-        return value_;
-    }
+    const T& get() const { return value_; }
 
     void set(T newValue) {
         value_ = std::move(newValue);
@@ -35,23 +32,16 @@ private:
 // Persists values across full widget tree rebuilds.
 class CompositionContext {
 public:
-    CompositionContext()
-        : onInvalidate_(std::make_shared<std::function<void()>>()) {
-    }
+    CompositionContext() : onInvalidate_(std::make_shared<std::function<void()>>()) {}
 
     explicit CompositionContext(std::function<void()> onInvalidate)
-        : onInvalidate_(std::make_shared<std::function<void()>>(std::move(onInvalidate))) {
-    }
+        : onInvalidate_(std::make_shared<std::function<void()>>(std::move(onInvalidate))) {}
 
-    void setInvalidate(std::function<void()> fn) {
-        *onInvalidate_ = std::move(fn);
-    }
+    void setInvalidate(std::function<void()> fn) { *onInvalidate_ = std::move(fn); }
 
-    void reset() {
-        nextPosition_ = 0;
-    }
+    void reset() { nextPosition_ = 0; }
 
-    template<typename T>
+    template <typename T>
     T& remember(std::function<T()> factory) {
         int pos = nextPosition_++;
         auto it = store_.find(pos);
@@ -64,7 +54,7 @@ public:
         return *ptr;
     }
 
-    template<typename T>
+    template <typename T>
     MutableState<T>& rememberState(std::function<T()> factory) {
         int pos = nextPosition_++;
         auto it = stateStore_.find(pos);
@@ -77,7 +67,7 @@ public:
         return *ptr;
     }
 
-    template<typename T>
+    template <typename T>
     T& rememberKey(const std::string& key, std::function<T()> factory) {
         auto it = keyStore_.find(key);
         if (it != keyStore_.end()) {

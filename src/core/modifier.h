@@ -1,10 +1,10 @@
 #pragma once
 
+#include "widget.h"
 #include <functional>
 #include <memory>
-#include <vector>
 #include <raylib.h>
-#include "widget.h"
+#include <vector>
 
 namespace sgui {
 
@@ -40,14 +40,24 @@ public:
     Modifier fillMaxWidth() const;
     Modifier fillMaxHeight() const;
     Modifier fillMaxSize() const;
+    Modifier align(Alignment alignment) const;
 
     std::shared_ptr<Widget> then(std::shared_ptr<Widget> child) const;
 
 private:
     struct Entry {
         enum Type : uint8_t {
-            Padding, Size, Background, Border, Clickable,
-            Weight, Offset, FillMaxWidth, FillMaxHeight, FillMaxSize
+            Padding,
+            Size,
+            Background,
+            Border,
+            Clickable,
+            Weight,
+            Offset,
+            FillMaxWidth,
+            FillMaxHeight,
+            FillMaxSize,
+            Align
         };
         Type type;
         int arg1 = 0;

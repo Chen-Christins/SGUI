@@ -19,9 +19,7 @@ public:
         notify();
     }
 
-    const T& get() const {
-        return value_;
-    }
+    const T& get() const { return value_; }
 
     void observe(Observer observer) {
         observers_.push_back(observer);
@@ -49,9 +47,8 @@ class DerivedState {
 public:
     using Observer = std::function<void(const T&)>;
 
-    template<typename F>
-    DerivedState(F compute) : compute_(compute), dirty_(true) {
-    }
+    template <typename F>
+    DerivedState(F compute) : compute_(compute), dirty_(true) {}
 
     const T& get() {
         if (dirty_) {
@@ -68,7 +65,7 @@ public:
         }
     }
 
-    template<typename U>
+    template <typename U>
     void dependsOn(State<U>& state) {
         auto key = reinterpret_cast<uintptr_t>(&state);
         if (deps_.find(key) != deps_.end()) {
@@ -78,9 +75,7 @@ public:
         state.observe([this](const U&) { invalidate(); });
     }
 
-    void observe(Observer observer) {
-        observers_.push_back(std::move(observer));
-    }
+    void observe(Observer observer) { observers_.push_back(std::move(observer)); }
 
 private:
     void notify() {
@@ -99,7 +94,7 @@ private:
 };
 
 // Factory for DerivedState
-template<typename F>
+template <typename F>
 auto derivedStateOf(F compute) -> DerivedState<decltype(compute())> {
     return DerivedState<decltype(compute())>(compute);
 }

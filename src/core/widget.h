@@ -1,18 +1,34 @@
 #pragma once
 
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include <functional>
 
 #include <raylib.h>
 
 namespace sgui {
 
-template<typename T> class CompositionLocal;
+template <typename T>
+class CompositionLocal;
 
 // Theme-able text color — override via LocalTextColor.provides(color, child)
 extern CompositionLocal<Color> LocalTextColor;
+
+enum class Arrangement {
+    Start,
+    Center,
+    End,
+    SpaceBetween,
+    SpaceAround,
+    SpaceEvenly
+};
+
+enum class Alignment {
+    Start,
+    Center,
+    End
+};
 
 struct Size {
     int width = 0;
@@ -22,8 +38,8 @@ struct Size {
 struct RenderContext {
     int x;
     int y;
-    int maxWidth = -1;   // -1 = unbounded
-    int maxHeight = -1;  // -1 = unbounded
+    int maxWidth = -1;  // -1 = unbounded
+    int maxHeight = -1; // -1 = unbounded
 };
 
 // Base interface for all UI elements
@@ -60,24 +76,31 @@ private:
 // Represents a vertical column layout
 class Column : public Widget {
 public:
-    Column(std::vector<std::shared_ptr<Widget>> children);
-    void render(RenderContext& ctx) override;
-    Size measure() const override;
-
-private:
-    std::vector<std::shared_ptr<Widget>> children_;
-};
-
-// Represents a horizontal row layout
-class Row : public Widget {
-public:
-    Row(std::vector<std::shared_ptr<Widget>> children, int spacing = 10);
+    Column(std::vector<std::shared_ptr<Widget>> children, int spacing = 5, Arrangement arrangement = Arrangement::Start,
+           Alignment alignment = Alignment::Start);
     void render(RenderContext& ctx) override;
     Size measure() const override;
 
 private:
     std::vector<std::shared_ptr<Widget>> children_;
     int spacing_;
+    Arrangement arrangement_;
+    Alignment alignment_;
+};
+
+// Represents a horizontal row layout
+class Row : public Widget {
+public:
+    Row(std::vector<std::shared_ptr<Widget>> children, int spacing = 10, Arrangement arrangement = Arrangement::Start,
+        Alignment alignment = Alignment::Start);
+    void render(RenderContext& ctx) override;
+    Size measure() const override;
+
+private:
+    std::vector<std::shared_ptr<Widget>> children_;
+    int spacing_;
+    Arrangement arrangement_;
+    Alignment alignment_;
 };
 
 // Represents padding around a widget

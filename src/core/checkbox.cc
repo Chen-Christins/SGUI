@@ -6,30 +6,21 @@ namespace sgui {
 static constexpr int kBoxSize = 20;
 static constexpr int kGap = 8;
 
-Checkbox::Checkbox(MutableState<bool>& checkedState, std::string label)
-    : checkedState_(checkedState), label_(std::move(label))
-{
-}
+Checkbox::Checkbox(MutableState<bool>& checkedState, std::string label) : checkedState_(checkedState), label_(std::move(label)) {}
 
-Size Checkbox::measure() const
-{
+Size Checkbox::measure() const {
     int textW = MeasureText(label_.c_str(), 20);
-    return { kBoxSize + kGap + textW, kBoxSize + 4 };
+    return {kBoxSize + kGap + textW, kBoxSize + 4};
 }
 
-void Checkbox::render(RenderContext& ctx)
-{
+void Checkbox::render(RenderContext& ctx) {
     bool checked = checkedState_.get();
 
-    Rectangle box = {
-        (float)ctx.x + 2, (float)ctx.y + 2,
-        (float)kBoxSize, (float)kBoxSize
-    };
+    Rectangle box = {(float)ctx.x + 2, (float)ctx.y + 2, (float)kBoxSize, (float)kBoxSize};
 
     // Click detection on the box area
     Vector2 mp = GetMousePosition();
-    if (CheckCollisionPointRec(mp, box) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-    {
+    if (CheckCollisionPointRec(mp, box) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         checkedState_.set(!checked);
     }
 
@@ -40,11 +31,10 @@ void Checkbox::render(RenderContext& ctx)
     DrawRectangleLinesEx(box, 2.0f, checked ? DARKBLUE : DARKGRAY);
 
     // Draw check mark
-    if (checked)
-    {
-        Vector2 a = { box.x + 3, box.y + 10 };
-        Vector2 b = { box.x + 8, box.y + 16 };
-        Vector2 c = { box.x + 18, box.y + 4 };
+    if (checked) {
+        Vector2 a = {box.x + 3, box.y + 10};
+        Vector2 b = {box.x + 8, box.y + 16};
+        Vector2 c = {box.x + 18, box.y + 4};
         DrawLineEx(a, b, 3.0f, WHITE);
         DrawLineEx(b, c, 3.0f, WHITE);
     }

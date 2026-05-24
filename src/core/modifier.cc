@@ -1,13 +1,12 @@
 #include "modifier.h"
+#include "layout.h"
 
 namespace sgui {
 namespace {
 
 class PaddingModifier : public Widget {
 public:
-    PaddingModifier(int px, std::shared_ptr<Widget> child)
-        : px_(px), child_(std::move(child)) {
-    }
+    PaddingModifier(int px, std::shared_ptr<Widget> child) : px_(px), child_(std::move(child)) {}
 
     void render(RenderContext& ctx) override {
         int startX = ctx.x;
@@ -21,7 +20,7 @@ public:
 
     Size measure() const override {
         Size s = child_->measure();
-        return { s.width + px_ * 2, s.height + px_ * 2 };
+        return {s.width + px_ * 2, s.height + px_ * 2};
     }
 
 private:
@@ -31,9 +30,7 @@ private:
 
 class SizeModifier : public Widget {
 public:
-    SizeModifier(int width, int height, std::shared_ptr<Widget> child)
-        : width_(width), height_(height), child_(std::move(child)) {
-    }
+    SizeModifier(int width, int height, std::shared_ptr<Widget> child) : width_(width), height_(height), child_(std::move(child)) {}
 
     void render(RenderContext& ctx) override {
         int startX = ctx.x;
@@ -43,9 +40,7 @@ public:
         ctx.y = startY + height_;
     }
 
-    Size measure() const override {
-        return { width_, height_ };
-    }
+    Size measure() const override { return {width_, height_}; }
 
 private:
     int width_;
@@ -56,29 +51,20 @@ private:
 class BackgroundModifier : public Widget {
 public:
     BackgroundModifier(Color color, int radius, std::shared_ptr<Widget> child)
-        : color_(color), radius_(radius), child_(std::move(child)) {
-    }
+        : color_(color), radius_(radius), child_(std::move(child)) {}
 
     void render(RenderContext& ctx) override {
         Size childSize = child_->measure();
-        Rectangle r = {
-            (float)ctx.x,
-            (float)ctx.y,
-            (float)childSize.width,
-            (float)childSize.height
-        };
+        Rectangle r = {(float)ctx.x, (float)ctx.y, (float)childSize.width, (float)childSize.height};
         if (radius_ > 0) {
             DrawRectangleRounded(r, (float)radius_, 8, color_);
-        }
-        else {
+        } else {
             DrawRectangleRec(r, color_);
         }
         child_->render(ctx);
     }
 
-    Size measure() const override {
-        return child_->measure();
-    }
+    Size measure() const override { return child_->measure(); }
 
 private:
     Color color_;
@@ -89,24 +75,16 @@ private:
 class BorderModifier : public Widget {
 public:
     BorderModifier(int width, Color color, std::shared_ptr<Widget> child)
-        : borderWidth_(width), color_(color), child_(std::move(child)) {
-    }
+        : borderWidth_(width), color_(color), child_(std::move(child)) {}
 
     void render(RenderContext& ctx) override {
         Size childSize = child_->measure();
-        Rectangle r = {
-            (float)ctx.x,
-            (float)ctx.y,
-            (float)childSize.width,
-            (float)childSize.height
-        };
+        Rectangle r = {(float)ctx.x, (float)ctx.y, (float)childSize.width, (float)childSize.height};
         child_->render(ctx);
         DrawRectangleLinesEx(r, (float)borderWidth_, color_);
     }
 
-    Size measure() const override {
-        return child_->measure();
-    }
+    Size measure() const override { return child_->measure(); }
 
 private:
     int borderWidth_;
@@ -117,18 +95,11 @@ private:
 class ClickableModifier : public Widget {
 public:
     ClickableModifier(std::function<void()> onClick, std::shared_ptr<Widget> child)
-        : onClick_(std::move(onClick))
-        , child_(std::move(child)) {
-    }
+        : onClick_(std::move(onClick)), child_(std::move(child)) {}
 
     void render(RenderContext& ctx) override {
         Size childSize = child_->measure();
-        Rectangle bounds = {
-            (float)ctx.x,
-            (float)ctx.y,
-            (float)childSize.width,
-            (float)childSize.height
-        };
+        Rectangle bounds = {(float)ctx.x, (float)ctx.y, (float)childSize.width, (float)childSize.height};
         Vector2 mousePoint = GetMousePosition();
         if (CheckCollisionPointRec(mousePoint, bounds) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             if (onClick_) {
@@ -138,9 +109,7 @@ public:
         child_->render(ctx);
     }
 
-    Size measure() const override {
-        return child_->measure();
-    }
+    Size measure() const override { return child_->measure(); }
 
 private:
     std::function<void()> onClick_;
@@ -149,9 +118,7 @@ private:
 
 class OffsetModifier : public Widget {
 public:
-    OffsetModifier(int dx, int dy, std::shared_ptr<Widget> child)
-        : dx_(dx), dy_(dy), child_(std::move(child)) {
-    }
+    OffsetModifier(int dx, int dy, std::shared_ptr<Widget> child) : dx_(dx), dy_(dy), child_(std::move(child)) {}
 
     void render(RenderContext& ctx) override {
         int startX = ctx.x;
@@ -166,7 +133,7 @@ public:
 
     Size measure() const override {
         Size s = child_->measure();
-        return { s.width + dx_, s.height + dy_ };
+        return {s.width + dx_, s.height + dy_};
     }
 
 private:
@@ -177,9 +144,7 @@ private:
 
 class FillMaxWidthModifier : public Widget {
 public:
-    explicit FillMaxWidthModifier(std::shared_ptr<Widget> child)
-        : child_(std::move(child)) {
-    }
+    explicit FillMaxWidthModifier(std::shared_ptr<Widget> child) : child_(std::move(child)) {}
 
     void render(RenderContext& ctx) override {
         int startX = ctx.x;
@@ -190,15 +155,12 @@ public:
             child_->render(childCtx);
             ctx.x = startX + ctx.maxWidth;
             ctx.y = startY + (childCtx.y - startY);
-        }
-        else {
+        } else {
             child_->render(ctx);
         }
     }
 
-    Size measure() const override {
-        return child_->measure();
-    }
+    Size measure() const override { return child_->measure(); }
 
 private:
     std::shared_ptr<Widget> child_;
@@ -206,9 +168,7 @@ private:
 
 class FillMaxHeightModifier : public Widget {
 public:
-    explicit FillMaxHeightModifier(std::shared_ptr<Widget> child)
-        : child_(std::move(child)) {
-    }
+    explicit FillMaxHeightModifier(std::shared_ptr<Widget> child) : child_(std::move(child)) {}
 
     void render(RenderContext& ctx) override {
         int startX = ctx.x;
@@ -219,15 +179,12 @@ public:
             child_->render(childCtx);
             ctx.x = startX + (childCtx.x - startX);
             ctx.y = startY + ctx.maxHeight;
-        }
-        else {
+        } else {
             child_->render(ctx);
         }
     }
 
-    Size measure() const override {
-        return child_->measure();
-    }
+    Size measure() const override { return child_->measure(); }
 
 private:
     std::shared_ptr<Widget> child_;
@@ -235,9 +192,7 @@ private:
 
 class FillMaxSizeModifier : public Widget {
 public:
-    explicit FillMaxSizeModifier(std::shared_ptr<Widget> child)
-        : child_(std::move(child)) {
-    }
+    explicit FillMaxSizeModifier(std::shared_ptr<Widget> child) : child_(std::move(child)) {}
 
     void render(RenderContext& ctx) override {
         int startX = ctx.x;
@@ -254,9 +209,7 @@ public:
         ctx.y = startY + (ctx.maxHeight > 0 ? ctx.maxHeight : (childCtx.y - startY));
     }
 
-    Size measure() const override {
-        return child_->measure();
-    }
+    Size measure() const override { return child_->measure(); }
 
 private:
     std::shared_ptr<Widget> child_;
@@ -266,18 +219,11 @@ private:
 
 // ---- WeightModifier (public, used by Row/Column for layout) ----
 
-WeightModifier::WeightModifier(float weight, std::shared_ptr<Widget> child)
-    : weight_(weight)
-    , child_(std::move(child)) {
-}
+WeightModifier::WeightModifier(float weight, std::shared_ptr<Widget> child) : weight_(weight), child_(std::move(child)) {}
 
-float WeightModifier::weight() const {
-    return weight_;
-}
+float WeightModifier::weight() const { return weight_; }
 
-void WeightModifier::setAllocatedSize(int size) {
-    allocatedSize_ = size;
-}
+void WeightModifier::setAllocatedSize(int size) { allocatedSize_ = size; }
 
 void WeightModifier::render(RenderContext& ctx) {
     int startX = ctx.x;
@@ -289,70 +235,74 @@ void WeightModifier::render(RenderContext& ctx) {
     }
 }
 
-Size WeightModifier::measure() const {
-    return child_->measure();
-}
+Size WeightModifier::measure() const { return child_->measure(); }
 
 // ---- Modifier methods ----
 
 Modifier Modifier::padding(int px) const {
     Modifier m = *this;
-    m.entries_.push_back({ Entry::Padding, px });
+    m.entries_.push_back({Entry::Padding, px});
     return m;
 }
 
 Modifier Modifier::size(int width, int height) const {
     Modifier m = *this;
-    m.entries_.push_back({ Entry::Size, width, height });
+    m.entries_.push_back({Entry::Size, width, height});
     return m;
 }
 
 Modifier Modifier::background(Color color, int radius) const {
     Modifier m = *this;
-    m.entries_.push_back({ Entry::Background, radius, 0, color });
+    m.entries_.push_back({Entry::Background, radius, 0, color});
     return m;
 }
 
 Modifier Modifier::border(int width, Color color) const {
     Modifier m = *this;
-    m.entries_.push_back({ Entry::Border, width, 0, color });
+    m.entries_.push_back({Entry::Border, width, 0, color});
     return m;
 }
 
 Modifier Modifier::clickable(std::function<void()> onClick) const {
     Modifier m = *this;
-    m.entries_.push_back({ Entry::Clickable });
+    m.entries_.push_back({Entry::Clickable});
     m.entries_.back().onClick = std::move(onClick);
     return m;
 }
 
 Modifier Modifier::weight(float weight) const {
     Modifier m = *this;
-    m.entries_.push_back({ Entry::Weight, 0, 0, BLANK, {}, weight });
+    m.entries_.push_back({Entry::Weight, 0, 0, BLANK, {}, weight});
     return m;
 }
 
 Modifier Modifier::offset(int dx, int dy) const {
     Modifier m = *this;
-    m.entries_.push_back({ Entry::Offset, dx, dy });
+    m.entries_.push_back({Entry::Offset, dx, dy});
     return m;
 }
 
 Modifier Modifier::fillMaxWidth() const {
     Modifier m = *this;
-    m.entries_.push_back({ Entry::FillMaxWidth });
+    m.entries_.push_back({Entry::FillMaxWidth});
     return m;
 }
 
 Modifier Modifier::fillMaxHeight() const {
     Modifier m = *this;
-    m.entries_.push_back({ Entry::FillMaxHeight });
+    m.entries_.push_back({Entry::FillMaxHeight});
     return m;
 }
 
 Modifier Modifier::fillMaxSize() const {
     Modifier m = *this;
-    m.entries_.push_back({ Entry::FillMaxSize });
+    m.entries_.push_back({Entry::FillMaxSize});
+    return m;
+}
+
+Modifier Modifier::align(Alignment alignment) const {
+    Modifier m = *this;
+    m.entries_.push_back({Entry::Align, (int)alignment});
     return m;
 }
 
@@ -360,36 +310,39 @@ std::shared_ptr<Widget> Modifier::then(std::shared_ptr<Widget> child) const {
     auto result = child;
     for (auto it = entries_.rbegin(); it != entries_.rend(); ++it) {
         switch (it->type) {
-            case Entry::Padding:
-                result = std::make_shared<PaddingModifier>(it->arg1, result);
-                break;
-            case Entry::Size:
-                result = std::make_shared<SizeModifier>(it->arg1, it->arg2, result);
-                break;
-            case Entry::Background:
-                result = std::make_shared<BackgroundModifier>(it->color, it->arg1, result);
-                break;
-            case Entry::Border:
-                result = std::make_shared<BorderModifier>(it->arg1, it->color, result);
-                break;
-            case Entry::Clickable:
-                result = std::make_shared<ClickableModifier>(it->onClick, result);
-                break;
-            case Entry::Offset:
-                result = std::make_shared<OffsetModifier>(it->arg1, it->arg2, result);
-                break;
-            case Entry::FillMaxWidth:
-                result = std::make_shared<FillMaxWidthModifier>(result);
-                break;
-            case Entry::FillMaxHeight:
-                result = std::make_shared<FillMaxHeightModifier>(result);
-                break;
-            case Entry::FillMaxSize:
-                result = std::make_shared<FillMaxSizeModifier>(result);
-                break;
-            case Entry::Weight:
-                result = std::make_shared<WeightModifier>(it->weightVal, result);
-                break;
+        case Entry::Padding:
+            result = std::make_shared<PaddingModifier>(it->arg1, result);
+            break;
+        case Entry::Size:
+            result = std::make_shared<SizeModifier>(it->arg1, it->arg2, result);
+            break;
+        case Entry::Background:
+            result = std::make_shared<BackgroundModifier>(it->color, it->arg1, result);
+            break;
+        case Entry::Border:
+            result = std::make_shared<BorderModifier>(it->arg1, it->color, result);
+            break;
+        case Entry::Clickable:
+            result = std::make_shared<ClickableModifier>(it->onClick, result);
+            break;
+        case Entry::Offset:
+            result = std::make_shared<OffsetModifier>(it->arg1, it->arg2, result);
+            break;
+        case Entry::FillMaxWidth:
+            result = std::make_shared<FillMaxWidthModifier>(result);
+            break;
+        case Entry::FillMaxHeight:
+            result = std::make_shared<FillMaxHeightModifier>(result);
+            break;
+        case Entry::FillMaxSize:
+            result = std::make_shared<FillMaxSizeModifier>(result);
+            break;
+        case Entry::Align:
+            result = std::make_shared<AlignModifier>((Alignment)it->arg1, result);
+            break;
+        case Entry::Weight:
+            result = std::make_shared<WeightModifier>(it->weightVal, result);
+            break;
         }
     }
     return result;

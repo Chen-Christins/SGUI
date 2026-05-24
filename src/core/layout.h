@@ -1,10 +1,26 @@
 #pragma once
 
+#include "widget.h"
 #include <memory>
 #include <vector>
-#include "widget.h"
 
 namespace sgui {
+
+// Overrides parent Alignment for a specific child in Row/Column.
+// Detected by Row/Column via dynamic_cast during layout.
+class AlignModifier : public Widget {
+public:
+    AlignModifier(Alignment alignment, std::shared_ptr<Widget> child);
+
+    Alignment alignment() const;
+
+    void render(RenderContext& ctx) override;
+    Size measure() const override;
+
+private:
+    Alignment alignment_;
+    std::shared_ptr<Widget> child_;
+};
 
 // Overlays children on top of each other at the same origin
 class Box : public Widget {

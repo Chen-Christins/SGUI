@@ -11,6 +11,7 @@ add_library(sgui STATIC
     src/core/layout.cc
     src/core/text_field.cc
     src/core/checkbox.cc
+    src/core/scroll.cc
 )
 
 target_include_directories(sgui PUBLIC src)

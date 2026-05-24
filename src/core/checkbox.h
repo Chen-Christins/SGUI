@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string>
-#include "widget.h"
 #include "remember.h"
+#include "widget.h"
+#include <string>
 
 namespace sgui {
 
