@@ -50,23 +50,16 @@ jobs:
         run: |
           mkdir -p pkg/include pkg/lib
 
-          # Copy all headers preserving directory structure under src/
           find src -name '*.h' | while read f; do
             dst="pkg/include/${f#src/}"
             mkdir -p "$(dirname "$dst")"
             cp "$f" "$dst"
           done
 
-          # Copy sgui static library (lib/ or build/ as fallback)
-          SGUI_LIB=$(find lib build -name "libsgui.a" -not -path "*/CMakeFiles/*" | head -1)
-          if [ -z "$SGUI_LIB" ]; then
-            echo "ERROR: libsgui.a not found"; exit 1
-          fi
-          cp "$SGUI_LIB" pkg/lib/
-
-          # Copy raylib static library from build tree
-          RAYLIB_LIB=$(find build/_deps -name "libraylib.a" -not -path "*/CMakeFiles/*" | head -1)
-          cp "$RAYLIB_LIB" pkg/lib/
+          # All static libraries (sgui + raylib) go to lib/ via CMAKE_ARCHIVE_OUTPUT_DIRECTORY
+          cp lib/lib*.a pkg/lib/ 2>/dev/null || \
+          cp lib/Release/lib*.a pkg/lib/ 2>/dev/null || \
+          { echo "ERROR: no .a files found in lib/"; exit 1; }
 
           cd pkg && zip -r "../${{ steps.name.outputs.pkg }}.zip" .
 
@@ -76,25 +69,16 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path pkg/include, pkg/lib | Out-Null
 
-          # Copy all headers preserving directory structure under src/
           Get-ChildItem -Path src -Recurse -Filter *.h | ForEach-Object {
             $dst = "pkg/include/$($_.FullName.Substring($PWD.Path.Length + 5))"
             New-Item -ItemType Directory -Force -Path (Split-Path $dst) | Out-Null
             Copy-Item $_.FullName $dst
           }
 
-          # Copy sgui static library (lib/ or build/ as fallback)
-          $sgui = Get-ChildItem -Path lib, build -Recurse -Name "sgui.lib" |
-                    Where-Object { $_ -notmatch "CMakeFiles" } | Select-Object -First 1
-          if (-not $sgui) { throw "sgui.lib not found" }
-          if ($sgui.StartsWith("lib")) { Copy-Item $sgui pkg/lib/ }
-          else { Copy-Item "build/$sgui" pkg/lib/ }
-
-          # Copy raylib static library from build tree
-          $raylib = Get-ChildItem -Path build/_deps -Recurse -Name "raylib.lib" |
-                    Where-Object { $_ -notmatch "CMakeFiles" } | Select-Object -First 1
-          if (-not $raylib) { throw "raylib.lib not found" }
-          Copy-Item "build/_deps/$raylib" pkg/lib/
+          # All static libraries (sgui + raylib) go to lib/ via CMAKE_ARCHIVE_OUTPUT_DIRECTORY
+          if (Test-Path lib/*.lib)             { Copy-Item lib/*.lib pkg/lib/ }
+          elseif (Test-Path lib/Release/*.lib) { Copy-Item lib/Release/*.lib pkg/lib/ }
+          else { throw "no .lib files found in lib/" }
 
           Compress-Archive -Path pkg/* -DestinationPath "${{ steps.name.outputs.pkg }}.zip"
 
