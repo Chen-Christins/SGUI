@@ -48,6 +48,10 @@ public:
     virtual ~Widget() = default;
     virtual void render(RenderContext& ctx) = 0;
     virtual Size measure() const { return {}; }
+    // Returns true if this widget wants to expand vertically to fill maxHeight
+    virtual bool wantsMaxHeight() const { return false; }
+    // Returns true if this widget wants to expand horizontally to fill maxWidth
+    virtual bool wantsMaxWidth() const { return false; }
 };
 
 // Represents a text label

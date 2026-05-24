@@ -17,10 +17,9 @@ Size VerticalScroll::measure() const { return child_->measure(); }
 void VerticalScroll::render(RenderContext& ctx) {
     int vpX = ctx.x;
     int vpY = ctx.y;
-    int vpW = ctx.maxWidth > 0 ? ctx.maxWidth : 400;
-    int vpH = ctx.maxHeight > 0 ? ctx.maxHeight : 400;
-
     Size contentSize = child_->measure();
+    int vpW = ctx.maxWidth > 0 ? ctx.maxWidth : contentSize.width;
+    int vpH = ctx.maxHeight > 0 ? ctx.maxHeight : contentSize.height;
 
     // Clamp scroll offset
     float maxScroll = (float)std::max(0, contentSize.height - vpH);
@@ -87,10 +86,9 @@ Size HorizontalScroll::measure() const { return child_->measure(); }
 void HorizontalScroll::render(RenderContext& ctx) {
     int vpX = ctx.x;
     int vpY = ctx.y;
-    int vpW = ctx.maxWidth > 0 ? ctx.maxWidth : 400;
-    int vpH = ctx.maxHeight > 0 ? ctx.maxHeight : 400;
-
     Size contentSize = child_->measure();
+    int vpW = ctx.maxWidth > 0 ? ctx.maxWidth : contentSize.width;
+    int vpH = ctx.maxHeight > 0 ? ctx.maxHeight : contentSize.height;
 
     // Clamp scroll offset
     float maxScroll = (float)std::max(0, contentSize.width - vpW);

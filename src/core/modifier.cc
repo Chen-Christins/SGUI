@@ -35,12 +35,22 @@ public:
     void render(RenderContext& ctx) override {
         int startX = ctx.x;
         int startY = ctx.y;
-        child_->render(ctx);
-        ctx.x = startX + width_;
-        ctx.y = startY + height_;
+        RenderContext childCtx = ctx;
+        if (width_ >= 0) {
+            childCtx.maxWidth = width_;
+        }
+        if (height_ >= 0) {
+            childCtx.maxHeight = height_;
+        }
+        child_->render(childCtx);
+        ctx.x = width_ >= 0 ? startX + width_ : childCtx.x;
+        ctx.y = height_ >= 0 ? startY + height_ : childCtx.y;
     }
 
-    Size measure() const override { return {width_, height_}; }
+    Size measure() const override {
+        Size s = child_->measure();
+        return { width_ >= 0 ? width_ : s.width, height_ >= 0 ? height_ : s.height };
+    }
 
 private:
     int width_;
@@ -147,20 +157,20 @@ public:
     explicit FillMaxWidthModifier(std::shared_ptr<Widget> child) : child_(std::move(child)) {}
 
     void render(RenderContext& ctx) override {
-        int startX = ctx.x;
-        int startY = ctx.y;
         if (ctx.maxWidth > 0) {
             RenderContext childCtx = ctx;
             childCtx.maxWidth = ctx.maxWidth;
             child_->render(childCtx);
-            ctx.x = startX + ctx.maxWidth;
-            ctx.y = startY + (childCtx.y - startY);
+            ctx.x = childCtx.x;
+            ctx.y = childCtx.y;
         } else {
             child_->render(ctx);
         }
     }
 
     Size measure() const override { return child_->measure(); }
+    bool wantsMaxHeight() const override { return child_->wantsMaxHeight(); }
+    bool wantsMaxWidth() const override { return true; }
 
 private:
     std::shared_ptr<Widget> child_;
@@ -171,20 +181,20 @@ public:
     explicit FillMaxHeightModifier(std::shared_ptr<Widget> child) : child_(std::move(child)) {}
 
     void render(RenderContext& ctx) override {
-        int startX = ctx.x;
-        int startY = ctx.y;
         if (ctx.maxHeight > 0) {
             RenderContext childCtx = ctx;
             childCtx.maxHeight = ctx.maxHeight;
             child_->render(childCtx);
-            ctx.x = startX + (childCtx.x - startX);
-            ctx.y = startY + ctx.maxHeight;
+            ctx.x = childCtx.x;
+            ctx.y = childCtx.y;
         } else {
             child_->render(ctx);
         }
     }
 
     Size measure() const override { return child_->measure(); }
+    bool wantsMaxHeight() const override { return true; }
+    bool wantsMaxWidth() const override { return child_->wantsMaxWidth(); }
 
 private:
     std::shared_ptr<Widget> child_;
@@ -195,8 +205,6 @@ public:
     explicit FillMaxSizeModifier(std::shared_ptr<Widget> child) : child_(std::move(child)) {}
 
     void render(RenderContext& ctx) override {
-        int startX = ctx.x;
-        int startY = ctx.y;
         RenderContext childCtx = ctx;
         if (ctx.maxWidth > 0) {
             childCtx.maxWidth = ctx.maxWidth;
@@ -205,11 +213,13 @@ public:
             childCtx.maxHeight = ctx.maxHeight;
         }
         child_->render(childCtx);
-        ctx.x = startX + (ctx.maxWidth > 0 ? ctx.maxWidth : (childCtx.x - startX));
-        ctx.y = startY + (ctx.maxHeight > 0 ? ctx.maxHeight : (childCtx.y - startY));
+        ctx.x = childCtx.x;
+        ctx.y = childCtx.y;
     }
 
     Size measure() const override { return child_->measure(); }
+    bool wantsMaxHeight() const override { return true; }
+    bool wantsMaxWidth() const override { return true; }
 
 private:
     std::shared_ptr<Widget> child_;

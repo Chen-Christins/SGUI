@@ -211,6 +211,10 @@ void Column::render(RenderContext& ctx) {
             auto* wm = dynamic_cast<WeightModifier*>(child.get());
             float share = totalWeight > 0.0f ? weightRemaining * info[i].weight / totalWeight : 0.0f;
             wm->setAllocatedSize((int)share);
+        } else if (child->wantsMaxHeight()) {
+            int remainingHeight = availableHeight - (y - startY);
+            if (remainingHeight < 0) { remainingHeight = 0; }
+            childCtx.maxHeight = remainingHeight;
         }
 
         child->render(childCtx);
@@ -383,6 +387,10 @@ void Row::render(RenderContext& ctx) {
             auto* wm = dynamic_cast<WeightModifier*>(child.get());
             float share = totalWeight > 0.0f ? weightRemaining * info[i].weight / totalWeight : 0.0f;
             wm->setAllocatedSize((int)share);
+        } else if (child->wantsMaxWidth()) {
+            int remainingWidth = availableWidth - (x - startX);
+            if (remainingWidth < 0) { remainingWidth = 0; }
+            childCtx.maxWidth = remainingWidth;
         }
 
         child->render(childCtx);
