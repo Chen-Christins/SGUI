@@ -61,7 +61,8 @@ jobs:
           cp lib/Release/lib*.a pkg/lib/ 2>/dev/null || \
           { echo "ERROR: no .a files found in lib/"; exit 1; }
 
-          cd pkg && zip -r "../${{ steps.name.outputs.pkg }}.zip" .
+          mv pkg "${{ steps.name.outputs.pkg }}"
+          zip -r "${{ steps.name.outputs.pkg }}.zip" "${{ steps.name.outputs.pkg }}"
 
       - name: Package (Windows)
         if: runner.os == 'Windows'
@@ -80,7 +81,8 @@ jobs:
           elseif (Test-Path lib/Release/*.lib) { Copy-Item lib/Release/*.lib pkg/lib/ }
           else { throw "no .lib files found in lib/" }
 
-          Compress-Archive -Path pkg/* -DestinationPath "${{ steps.name.outputs.pkg }}.zip"
+          Rename-Item pkg "${{ steps.name.outputs.pkg }}"
+          Compress-Archive -Path "${{ steps.name.outputs.pkg }}" -DestinationPath "${{ steps.name.outputs.pkg }}.zip"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

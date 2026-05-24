@@ -3,9 +3,9 @@
 
 #include <raylib.h>
 
-#include "core/state.h"
-#include "core/widget.h"
-#include "core/compose.h"
+#include <core/state.h>
+#include <core/widget.h>
+#include <core/compose.h>
 
 using namespace sgui;
 
