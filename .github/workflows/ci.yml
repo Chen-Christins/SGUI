@@ -89,7 +89,7 @@ jobs:
             found { output = output $0 "\n" }
             END { print output }
           ' CHANGELOG.md)
-          BODY=$(echo "$BODY" | sed -e '/./,$!d' -e :a -e '/^\n*$/{$d;N;ba' -e '}')
+          BODY=$(echo "$BODY" | sed -n '/./,$p' | tac | sed -n '/./,$p' | tac)
           echo "body<<EOF" >> $GITHUB_OUTPUT
           echo "$BODY" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
