@@ -69,7 +69,7 @@ void VerticalScroll::render(RenderContext& ctx) {
         }
         float barTravel = (float)(vpH - (int)barH);
         float barY = vpY + (scrollOffset_ / maxScroll) * barTravel;
-        DrawRectangleRounded({(float)barX, barY, (float)kScrollbarThickness, barH}, 3.0f, 4, Fade(DARKGRAY, 0.5f));
+        DrawRectangleRounded({(float)barX, barY, (float)kScrollbarThickness, barH}, 3.0f, 16, Fade(DARKGRAY, 0.5f));
     }
 
     ctx.x = vpX + vpW;
@@ -143,7 +143,7 @@ void HorizontalScroll::render(RenderContext& ctx) {
         }
         float barTravel = (float)(vpW - (int)barW);
         float barX = vpX + (scrollOffset_ / maxScroll) * barTravel;
-        DrawRectangleRounded({barX, (float)barY, barW, (float)kScrollbarThickness}, 3.0f, 4, Fade(DARKGRAY, 0.5f));
+        DrawRectangleRounded({barX, (float)barY, barW, (float)kScrollbarThickness}, 3.0f, 16, Fade(DARKGRAY, 0.5f));
     }
 
     ctx.x = vpX + vpW;

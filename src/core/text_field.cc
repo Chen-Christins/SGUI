@@ -5,8 +5,9 @@
 namespace sgui {
 
 TextField::TextField(MutableState<int>& focusedId, int id, MutableState<std::string>& textState, int& cursorPos,
-                     std::string placeholder)
-    : focusedId_(focusedId), id_(id), textState_(textState), cursorPos_(cursorPos), placeholder_(std::move(placeholder)) {}
+                     std::string placeholder, int minTabId, int maxTabId)
+    : focusedId_(focusedId), id_(id), textState_(textState), cursorPos_(cursorPos), placeholder_(std::move(placeholder)),
+      minTabId_(minTabId), maxTabId_(maxTabId) {}
 
 Size TextField::measure() const { return {200, 40}; }
 
@@ -111,6 +112,15 @@ void TextField::handleInput() {
             break;
         case KEY_RIGHT:
             moveCursorRight();
+            break;
+        case KEY_TAB:
+            if (minTabId_ >= 0 && maxTabId_ >= minTabId_) {
+                if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+                    focusedId_.set(id_ > minTabId_ ? id_ - 1 : maxTabId_);
+                } else {
+                    focusedId_.set(id_ < maxTabId_ ? id_ + 1 : minTabId_);
+                }
+            }
             break;
         case KEY_HOME:
             cursorPos_ = 0;

@@ -192,7 +192,7 @@ std::shared_ptr<Widget> App(State<int>& counter, CompositionContext& ctx) {
 }
 
 int main() {
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT);
     InitWindow(800, 600, "SGUI - Reactive C++ UI");
     SetTargetFPS(60);
 

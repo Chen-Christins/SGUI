@@ -16,7 +16,7 @@ public:
     // cursorPos: persisted cursor position (from CompositionContext::remember).
     // placeholder: shown when text is empty and field is not focused.
     TextField(MutableState<int>& focusedId, int id, MutableState<std::string>& textState, int& cursorPos,
-              std::string placeholder = "");
+              std::string placeholder = "", int minTabId = -1, int maxTabId = -1);
 
     void render(RenderContext& ctx) override;
     Size measure() const override;
@@ -34,6 +34,8 @@ private:
     MutableState<std::string>& textState_;
     int& cursorPos_;
     std::string placeholder_;
+    int minTabId_ = -1;
+    int maxTabId_ = -1;
 };
 
 } // namespace sgui

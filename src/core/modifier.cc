@@ -67,7 +67,7 @@ public:
         Size childSize = child_->measure();
         Rectangle r = {(float)ctx.x, (float)ctx.y, (float)childSize.width, (float)childSize.height};
         if (radius_ > 0) {
-            DrawRectangleRounded(r, (float)radius_, 8, color_);
+            DrawRectangleRounded(r, (float)radius_, 16, color_);
         } else {
             DrawRectangleRec(r, color_);
         }
@@ -235,13 +235,20 @@ float WeightModifier::weight() const { return weight_; }
 
 void WeightModifier::setAllocatedSize(int size) { allocatedSize_ = size; }
 
+void WeightModifier::setMainAxisHorizontal(bool horizontal) { mainAxisHorizontal_ = horizontal; }
+
 void WeightModifier::render(RenderContext& ctx) {
     int startX = ctx.x;
     int startY = ctx.y;
     child_->render(ctx);
     if (allocatedSize_ > 0) {
-        ctx.x = startX + allocatedSize_;
-        ctx.y = startY + (ctx.y - startY);
+        if (mainAxisHorizontal_) {
+            ctx.x = startX + allocatedSize_;
+            ctx.y = startY + (ctx.y - startY);
+        } else {
+            ctx.x = startX + (ctx.x - startX);
+            ctx.y = startY + allocatedSize_;
+        }
     }
 }
 

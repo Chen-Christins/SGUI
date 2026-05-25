@@ -16,6 +16,7 @@ public:
 
     float weight() const;
     void setAllocatedSize(int size);
+    void setMainAxisHorizontal(bool horizontal);
 
     void render(RenderContext& ctx) override;
     Size measure() const override;
@@ -23,6 +24,7 @@ public:
 private:
     float weight_;
     int allocatedSize_ = 0;
+    bool mainAxisHorizontal_ = true;
     std::shared_ptr<Widget> child_;
 };
 

@@ -203,7 +203,7 @@ void Column::render(RenderContext& ctx) {
             break;
         }
 
-        RenderContext childCtx = {cx, y, ctx.maxWidth, -1};
+        RenderContext childCtx = {cx, y, maxW, -1};
 
         if (info[i].isSpacer) {
             childCtx.maxHeight = spacerHeight;
@@ -211,6 +211,8 @@ void Column::render(RenderContext& ctx) {
             auto* wm = dynamic_cast<WeightModifier*>(child.get());
             float share = totalWeight > 0.0f ? weightRemaining * info[i].weight / totalWeight : 0.0f;
             wm->setAllocatedSize((int)share);
+            wm->setMainAxisHorizontal(false);
+            childCtx.maxHeight = (int)share;
         } else if (child->wantsMaxHeight()) {
             int remainingHeight = availableHeight - (y - startY);
             if (remainingHeight < 0) { remainingHeight = 0; }
@@ -379,7 +381,7 @@ void Row::render(RenderContext& ctx) {
             break;
         }
 
-        RenderContext childCtx = {x, cy, -1, ctx.maxHeight};
+        RenderContext childCtx = {x, cy, -1, maxH};
 
         if (info[i].isSpacer) {
             childCtx.maxWidth = spacerWidth;
@@ -387,6 +389,7 @@ void Row::render(RenderContext& ctx) {
             auto* wm = dynamic_cast<WeightModifier*>(child.get());
             float share = totalWeight > 0.0f ? weightRemaining * info[i].weight / totalWeight : 0.0f;
             wm->setAllocatedSize((int)share);
+            childCtx.maxWidth = (int)share;
         } else if (child->wantsMaxWidth()) {
             int remainingWidth = availableWidth - (x - startX);
             if (remainingWidth < 0) { remainingWidth = 0; }
