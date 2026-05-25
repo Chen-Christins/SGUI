@@ -37,6 +37,7 @@ public:
     Modifier background(Color color, int radius = 0) const;
     Modifier border(int width, Color color) const;
     Modifier clickable(std::function<void()> onClick) const;
+    Modifier hoverable(bool& isHovered) const;
     Modifier weight(float weight) const;
     Modifier offset(int dx, int dy) const;
     Modifier fillMaxWidth() const;
@@ -54,6 +55,7 @@ private:
             Background,
             Border,
             Clickable,
+            Hoverable,
             Weight,
             Offset,
             FillMaxWidth,
@@ -66,6 +68,7 @@ private:
         int arg2 = 0;
         Color color = BLANK;
         std::function<void()> onClick;
+        bool* hovered = nullptr;
         float weightVal = 0.0f;
     };
     std::vector<Entry> entries_;

@@ -4,10 +4,16 @@
 #include <memory>
 #include <vector>
 
+#include "badge.h"
 #include "checkbox.h"
+#include "chip.h"
+#include "context_menu.h"
+#include "dialog.h"
 #include "dropdown.h"
+#include "group_box.h"
 #include "image.h"
 #include "layout.h"
+#include "loading_spinner.h"
 #include "modifier.h"
 #include "progress_bar.h"
 #include "radio_button.h"
@@ -15,9 +21,11 @@
 #include "scroll.h"
 #include "separator.h"
 #include "slider.h"
+#include "stepper.h"
 #include "tabs.h"
 #include "text_field.h"
 #include "toggle.h"
+#include "tooltip.h"
 #include "widget.h"
 
 namespace sgui {
@@ -119,6 +127,56 @@ inline std::shared_ptr<Widget> tabBar(MutableState<int>& selectedTab, std::vecto
 inline std::shared_ptr<Widget> tabPanel(int index, MutableState<int>& selectedTab, std::shared_ptr<Widget> content,
                                          Modifier modifier = Modifier()) {
     return modifier.then(std::make_shared<TabPanel>(index, selectedTab, std::move(content)));
+}
+
+// ---- Overlay widgets (measure=0, ctx unchanged, place at end of tree) ----
+
+inline std::shared_ptr<Widget> dialog(MutableState<bool>& isOpen, std::string title,
+                                       std::shared_ptr<Widget> content,
+                                       std::vector<std::string> buttonLabels,
+                                       MutableState<int>& buttonClicked,
+                                       Modifier modifier = Modifier()) {
+    return modifier.then(std::make_shared<Dialog>(isOpen, std::move(title), std::move(content),
+                                                   std::move(buttonLabels), buttonClicked));
+}
+
+inline std::shared_ptr<Widget> tooltip(bool& showTooltip, std::shared_ptr<Widget> content,
+                                        Modifier modifier = Modifier()) {
+    return modifier.then(std::make_shared<Tooltip>(showTooltip, std::move(content)));
+}
+
+inline std::shared_ptr<Widget> contextMenu(MutableState<bool>& isOpen, int& screenX, int& screenY,
+                                            std::vector<std::string> items,
+                                            MutableState<int>& selectedItem,
+                                            Modifier modifier = Modifier()) {
+    return modifier.then(std::make_shared<ContextMenu>(isOpen, screenX, screenY,
+                                                        std::move(items), selectedItem));
+}
+
+// ---- Display widgets ----
+
+inline std::shared_ptr<Widget> badge(int count, std::shared_ptr<Widget> child,
+                                      Modifier modifier = Modifier()) {
+    return modifier.then(std::make_shared<Badge>(count, std::move(child)));
+}
+
+inline std::shared_ptr<Widget> chip(std::string label, Color backgroundColor,
+                                     Modifier modifier = Modifier()) {
+    return modifier.then(std::make_shared<Chip>(std::move(label), backgroundColor));
+}
+
+inline std::shared_ptr<Widget> groupBox(std::string title, std::shared_ptr<Widget> content,
+                                         Modifier modifier = Modifier()) {
+    return modifier.then(std::make_shared<GroupBox>(std::move(title), std::move(content)));
+}
+
+inline std::shared_ptr<Widget> loadingSpinner(int size = 24, Modifier modifier = Modifier()) {
+    return modifier.then(std::make_shared<LoadingSpinner>(size));
+}
+
+inline std::shared_ptr<Widget> stepper(MutableState<int>& value, int min, int max, int step = 1,
+                                        Modifier modifier = Modifier()) {
+    return modifier.then(std::make_shared<Stepper>(value, min, max, step));
 }
 
 } // namespace sgui

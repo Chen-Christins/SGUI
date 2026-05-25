@@ -126,6 +126,25 @@ private:
     std::shared_ptr<Widget> child_;
 };
 
+class HoverableModifier : public Widget {
+public:
+    HoverableModifier(bool& hovered, std::shared_ptr<Widget> child)
+        : hovered_(&hovered), child_(std::move(child)) {}
+
+    void render(RenderContext& ctx) override {
+        Size childSize = child_->measure();
+        Rectangle bounds = {(float)ctx.x, (float)ctx.y, (float)childSize.width, (float)childSize.height};
+        *hovered_ = CheckCollisionPointRec(GetMousePosition(), bounds);
+        child_->render(ctx);
+    }
+
+    Size measure() const override { return child_->measure(); }
+
+private:
+    bool* hovered_;
+    std::shared_ptr<Widget> child_;
+};
+
 class OffsetModifier : public Widget {
 public:
     OffsetModifier(int dx, int dy, std::shared_ptr<Widget> child) : dx_(dx), dy_(dy), child_(std::move(child)) {}
@@ -289,7 +308,13 @@ Modifier Modifier::clickable(std::function<void()> onClick) const {
 
 Modifier Modifier::weight(float weight) const {
     Modifier m = *this;
-    m.entries_.push_back({Entry::Weight, 0, 0, BLANK, {}, weight});
+    m.entries_.push_back({Entry::Weight, 0, 0, BLANK, {}, nullptr, weight});
+    return m;
+}
+
+Modifier Modifier::hoverable(bool& isHovered) const {
+    Modifier m = *this;
+    m.entries_.push_back({Entry::Hoverable, 0, 0, BLANK, {}, &isHovered, 0.0f});
     return m;
 }
 
@@ -359,6 +384,9 @@ std::shared_ptr<Widget> Modifier::then(std::shared_ptr<Widget> child) const {
             break;
         case Entry::Weight:
             result = std::make_shared<WeightModifier>(it->weightVal, result);
+            break;
+        case Entry::Hoverable:
+            result = std::make_shared<HoverableModifier>(*it->hovered, result);
             break;
         }
     }

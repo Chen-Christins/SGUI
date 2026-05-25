@@ -20,6 +20,14 @@ add_library(sgui STATIC
     src/core/radio_button.cc
     src/core/dropdown.cc
     src/core/tabs.cc
+    src/core/dialog.cc
+    src/core/tooltip.cc
+    src/core/context_menu.cc
+    src/core/badge.cc
+    src/core/chip.cc
+    src/core/group_box.cc
+    src/core/loading_spinner.cc
+    src/core/stepper.cc
 )
 
 target_include_directories(sgui PUBLIC src)
@@ -73,3 +81,27 @@ target_link_libraries(test_dropdown PRIVATE sgui)
 
 add_executable(test_tabs tests/test_tabs.cpp)
 target_link_libraries(test_tabs PRIVATE sgui)
+
+add_executable(test_dialog tests/test_dialog.cpp)
+target_link_libraries(test_dialog PRIVATE sgui)
+
+add_executable(test_tooltip tests/test_tooltip.cpp)
+target_link_libraries(test_tooltip PRIVATE sgui)
+
+add_executable(test_context_menu tests/test_context_menu.cpp)
+target_link_libraries(test_context_menu PRIVATE sgui)
+
+add_executable(test_badge tests/test_badge.cpp)
+target_link_libraries(test_badge PRIVATE sgui)
+
+add_executable(test_chip tests/test_chip.cpp)
+target_link_libraries(test_chip PRIVATE sgui)
+
+add_executable(test_group_box tests/test_group_box.cpp)
+target_link_libraries(test_group_box PRIVATE sgui)
+
+add_executable(test_loading_spinner tests/test_loading_spinner.cpp)
+target_link_libraries(test_loading_spinner PRIVATE sgui)
+
+add_executable(test_stepper tests/test_stepper.cpp)
+target_link_libraries(test_stepper PRIVATE sgui)
