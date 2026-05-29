@@ -33,7 +33,9 @@ int main() {
 
     // 2. 构建 Row，Modifier 设置 fill 属性，后面跟布局专属参数和子组件
     auto row = sgui::Row::create(
-        sgui::Modifier().fillMaxWidth(),
+        sgui::Modifier()
+            .fillMaxWidth()
+            .background(YELLOW),
         sgui::Arrangement::SpaceAround,
         sgui::Alignment::Center,
         {
@@ -45,7 +47,9 @@ int main() {
 
     // 3. 构建 Box 包裹标题，演示 2D 内容居中
     auto titleBox = sgui::Box::create(
-        sgui::Modifier().fillMaxWidth(),
+        sgui::Modifier()
+            .fillMaxWidth()
+            .background(BLUE),
         sgui::Alignment2D::Center,
         {
             title
@@ -54,7 +58,8 @@ int main() {
 
     // 4. 构建 Column 根节点，Modifier 设满宽高
     auto column = sgui::Column::create(
-        sgui::Modifier().fillMaxSize(),
+        sgui::Modifier()
+            .fillMaxSize(),
         sgui::Arrangement::SpaceAround,
         sgui::Alignment::End,
         {

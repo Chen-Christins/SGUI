@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <raylib.h>
+
 namespace sgui {
 
 class Modifier {
@@ -27,8 +29,14 @@ public:
         return *this;
     }
 
+    Modifier& background(::Color color) {
+        backgroundColor_ = color;
+        return *this;
+    }
+
     bool fillMaxWidth_ = false;
     bool fillMaxHeight_ = false;
+    ::Color backgroundColor_ = BLANK; // alpha=0 表示不绘制背景
 };
 
 } // namespace sgui

@@ -50,6 +50,10 @@ void Column::render(RenderContext& ctx) {
     int finalWidth = modifier.fillMaxWidth_ ? ctx.maxWidth : rawSize.width;
     int finalHeight = modifier.fillMaxHeight_ ? ctx.maxHeight : rawSize.height;
 
+    if (modifier.backgroundColor_.a > 0) {
+        DrawRectangle(ctx.x, ctx.y, finalWidth, finalHeight, modifier.backgroundColor_);
+    }
+
     int freeSpace = finalHeight - rawSize.height;
     if (freeSpace < 0) {
         freeSpace = 0;

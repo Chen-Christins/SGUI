@@ -34,6 +34,10 @@ void Box::render(RenderContext& ctx) {
     int finalWidth = modifier.fillMaxWidth_ ? ctx.maxWidth : rawSize.width;
     int finalHeight = modifier.fillMaxHeight_ ? ctx.maxHeight : rawSize.height;
 
+    if (modifier.backgroundColor_.a > 0) {
+        DrawRectangle(ctx.x, ctx.y, finalWidth, finalHeight, modifier.backgroundColor_);
+    }
+
     for (auto& child : children_) {
         Size childSize = child->measure();
         int cWidth = child->isFillMaxWidth() ? finalWidth : childSize.width;
