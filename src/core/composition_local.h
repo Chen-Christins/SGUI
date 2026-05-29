@@ -78,7 +78,9 @@ class CompositionLocal : public CompositionLocalKey {
 public:
     explicit CompositionLocal(T defaultValue) : defaultValue_(std::move(defaultValue)) {}
 
-    T current() const { return CompositionLocalScope::instance().get<T>(const_cast<CompositionLocal*>(this), defaultValue_); }
+    T current() const {
+        return CompositionLocalScope::instance().get<T>(const_cast<CompositionLocal*>(this), defaultValue_); 
+    }
 
     std::shared_ptr<Widget> provides(T value, std::shared_ptr<Widget> child) const {
         return std::make_shared<ProviderModifier>(const_cast<CompositionLocal*>(this), std::any(std::move(value)), std::move(child));

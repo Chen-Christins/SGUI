@@ -1,10 +1,12 @@
 #include <memory>
 #include <string>
 #include <raylib.h>
+
 #include <core/compose.h>
 #include <core/remember.h>
 #include <core/state.h>
 #include <core/widget.h>
+#include <spdlog/spdlog.h>
 
 using namespace sgui;
 
@@ -13,7 +15,7 @@ std::shared_ptr<Widget> App(State<int>& counter, CompositionContext& ctx) {
 
     return column({
         text("Button Test", Modifier()
-            .padding(16).background(BLUE, 8).fillMaxWidth()),
+            .padding(16).background(BLUE).fillMaxWidth()),
 
         text("Counter: " + std::to_string(counter.get()), Modifier().padding(8)),
 
@@ -60,9 +62,8 @@ std::shared_ptr<Widget> App(State<int>& counter, CompositionContext& ctx) {
             button("Left", [&]() {}, Modifier().padding(4).size(100, 40).background(GRAY, 4)),
             button("Center", [&]() {}, Modifier().padding(4).size(100, 40).background(GRAY, 4)),
             button("Right", [&]() {}, Modifier().padding(4).size(100, 40).background(GRAY, 4)),
-        }, 10, Arrangement::SpaceBetween, Alignment::Start,
-           Modifier().padding(8).fillMaxWidth()),
-    });
+        }, 10, Arrangement::SpaceBetween, Alignment::Start, Modifier().padding(8).fillMaxWidth()),
+    }, 10, Arrangement::Center, Alignment::Center);
 }
 
 int main() {
@@ -85,11 +86,17 @@ int main() {
     while (!WindowShouldClose()) {
         int sw = GetScreenWidth();
         int sh = GetScreenHeight();
+
         BeginDrawing();
+
         ClearBackground(RAYWHITE);
+        
         RenderContext rctx = { 0, 0, sw, sh };
         auto tree = uiTree;
-        if (tree) { tree->render(rctx); }
+        if (tree) {
+            tree->render(rctx);
+        }
+
         EndDrawing();
     }
     CloseWindow();

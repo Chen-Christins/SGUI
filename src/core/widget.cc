@@ -8,9 +8,13 @@ namespace sgui {
 // Default text color theme — can be overridden via LocalTextColor.provides()
 CompositionLocal<Color> LocalTextColor{DARKGRAY};
 
-Text::Text(std::string text) : text_(std::move(text)) {}
+Text::Text(std::string text) 
+    : text_(std::move(text)) {
+}
 
-Size Text::measure() const { return {MeasureText(text_.c_str(), 20), 30}; }
+Size Text::measure() const {
+    return {MeasureText(text_.c_str(), 20), 30}; 
+}
 
 void Text::render(RenderContext& ctx) {
     Color c = LocalTextColor.current();
@@ -19,7 +23,10 @@ void Text::render(RenderContext& ctx) {
     ctx.y += 30;
 }
 
-Button::Button(std::string text, std::function<void()> onClick) : text_(std::move(text)), onClick_(std::move(onClick)) {}
+Button::Button(std::string text, std::function<void()> onClick) 
+    : text_(std::move(text))
+    , onClick_(std::move(onClick)) {
+}
 
 Size Button::measure() const {
     int padding = 10;
@@ -49,7 +56,11 @@ void Button::render(RenderContext& ctx) {
 }
 
 Column::Column(std::vector<std::shared_ptr<Widget>> children, int spacing, Arrangement arrangement, Alignment alignment)
-    : children_(std::move(children)), spacing_(spacing), arrangement_(arrangement), alignment_(alignment) {}
+    : children_(std::move(children))
+    , spacing_(spacing)
+    , arrangement_(arrangement)
+    , alignment_(alignment) {
+}
 
 Size Column::measure() const {
     int maxW = 0;
@@ -229,7 +240,11 @@ void Column::render(RenderContext& ctx) {
 }
 
 Row::Row(std::vector<std::shared_ptr<Widget>> children, int spacing, Arrangement arrangement, Alignment alignment)
-    : children_(std::move(children)), spacing_(spacing), arrangement_(arrangement), alignment_(alignment) {}
+    : children_(std::move(children))
+    , spacing_(spacing)
+    , arrangement_(arrangement)
+    , alignment_(alignment) {
+}
 
 Size Row::measure() const {
     int totalW = 0;
@@ -405,7 +420,10 @@ void Row::render(RenderContext& ctx) {
     ctx.y = startY + maxH;
 }
 
-Padding::Padding(int padding, std::shared_ptr<Widget> child) : padding_(padding), child_(std::move(child)) {}
+Padding::Padding(int padding, std::shared_ptr<Widget> child) 
+    : padding_(padding)
+    , child_(std::move(child)) {
+}
 
 Size Padding::measure() const {
     Size s = child_->measure();
