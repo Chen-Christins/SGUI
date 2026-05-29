@@ -1,6 +1,6 @@
 /**
- * @file row.hpp
- * @brief 行布局组件
+ * @file column.hpp
+ * @brief 列布局组件
  * @author Christins (chen.christins@qq.com)
  * @date 2026-05-30
  * @copyright Apache 2.0
@@ -14,20 +14,20 @@
 
 namespace sgui {
 
-class Row : public Widget {
+class Column : public Widget {
 public:
-    Row& addChild(std::shared_ptr<Widget> child);
-    Row& setSpacing(int spacing);
+    Column& addChild(std::shared_ptr<Widget> child);
+    Column& setSpacing(int spacing);
     
     // 类似于 Compose 的 modifier
-    Row& fillMaxWidth(bool fill = true);
-    Row& fillMaxHeight(bool fill = true);
-    
-    // 主轴排列规则 (Arrangement.Start / Center / End ...)
-    Row& setHorizontalArrangement(Arrangement arr);
-    // 交叉轴对齐规则 (Alignment.Top / CenterVertically ...)
-    Row& setVerticalAlignment(Alignment align);
+    Column& fillMaxWidth(bool fill = true);
+    Column& fillMaxHeight(bool fill = true);
 
+    // 主轴排列规则 (Arrangement.Top / Center / Bottom ...)
+    Column& setVerticalArrangement(Arrangement arr);
+    // 交叉轴对齐规则 (Alignment.Start / CenterHorizontally ...)
+    Column& setHorizontalAlignment(Alignment align);
+    
     void render(RenderContext& ctx) override;
     Size measure() const override;
 
@@ -39,8 +39,8 @@ private:
     int spacing_ = 0;
     bool fillMaxWidth_ = false;
     bool fillMaxHeight_ = false;
-    Arrangement horizontalArrangement_ = Arrangement::Start;
-    Alignment verticalAlignment_ = Alignment::Start;
+    Arrangement verticalArrangement_ = Arrangement::Start;
+    Alignment horizontalAlignment_ = Alignment::Start;
 };
 
 } // namespace sgui

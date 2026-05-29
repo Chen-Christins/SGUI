@@ -28,6 +28,9 @@ public:
     virtual ~Widget() = default;
     virtual void render(RenderContext& ctx) = 0;
     virtual Size measure() const { return {}; }
+    
+    virtual bool isFillMaxWidth() const { return false; }
+    virtual bool isFillMaxHeight() const { return false; }
 };
 
 } // namespace sgui

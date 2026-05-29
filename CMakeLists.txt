@@ -12,6 +12,10 @@ include(cmake/dependencies.cmake)
 add_library(sgui STATIC
     src/core/text.cc
     src/core/window.cc
+    src/core/row.cc
+    src/core/column.cc
+    src/core/box.cc
+    src/core/spacer.cc
 )
 
 target_include_directories(sgui PUBLIC src)
