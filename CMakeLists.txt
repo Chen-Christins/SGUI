@@ -18,6 +18,7 @@ add_library(sgui STATIC
     src/core/row.cc
     src/core/column.cc
     src/core/box.cc
+    src/core/button.cc
     src/core/spacer.cc
 )
 

@@ -10,9 +10,12 @@
 #include <core/row.hpp>
 #include <core/column.hpp>
 #include <core/box.hpp>
+#include <core/button.hpp>
 #include <core/spacer.hpp>
 #include <core/alignment.hpp>
 #include <core/units.hpp>
+
+#include <iostream>
 #include <memory>
 
 int main() {
@@ -35,9 +38,9 @@ int main() {
     // 2. 构建 Row，用 dp() 函数设置 padding + border（无需 using）
     auto row = sgui::Row::create(
         sgui::Modifier()
-            .padding(sgui::dp(40), sgui::dp(8))
-            .fillMaxSize()
-            // .height(sgui::dp(40))
+            // .padding(sgui::dp(40), sgui::dp(8))
+            .fillMaxWidth()
+            .height(sgui::dp(40))
             .background(YELLOW),
         sgui::Arrangement::SpaceBetween,
         sgui::Alignment::End,
@@ -53,6 +56,9 @@ int main() {
         sgui::Modifier()
             .fillMaxWidth()
             .background(BLUE)
+            .clickable([] { 
+                std::cout << "titleBox clicked!" << std::endl;
+            })
             .alpha(0.1f),
         sgui::Alignment2D::Center,
         {
@@ -60,7 +66,22 @@ int main() {
         }
     );
 
-    // 4. 构建 Column 根节点，Modifier 设满宽高
+    // 4. 构建 Button，类似 Compose 的 Button 组件
+    auto btnText = std::make_shared<sgui::Text>("Click Me");
+    btnText->setFontSize(24).setColor(RAYWHITE).loadFont("./assets/fonts/NotoSansCJKsc-Regular.otf");
+
+    auto button = sgui::Button::create(
+        sgui::Modifier()
+            .background(DARKBLUE)
+            .roundedCorner(8.0f)
+            .padding(sgui::dp(24), sgui::dp(12)),
+        btnText,
+        []() {
+            std::cout << "Button clicked!" << std::endl;
+        }
+    );
+
+    // 5. 构建 Column 根节点，Modifier 设满宽高
     auto column = sgui::Column::create(
         sgui::Modifier()
             .fillMaxSize(),
@@ -68,15 +89,12 @@ int main() {
         sgui::Alignment::End,
         {
             titleBox,
-            row
+            row,
+            button
         }
     );
 
-    app.run([&]() {
-        // 直接传递根组件的 RenderContext（0, 0 坐标，窗口宽高）
-        sgui::RenderContext ctx{0, 0, 800, 600};
-        column->render(ctx);
-    });
+    app.run(column);
 
     return 0;
 }

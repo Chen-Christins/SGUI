@@ -7,6 +7,7 @@
 #pragma once
 
 #include <raylib.h>
+#include <functional>
 
 namespace sgui {
 
@@ -74,6 +75,19 @@ public:
         return *this;
     }
 
+    // —— 圆角 ——
+    // —— 可点击 (类似 Modifier.clickable) ——
+    Modifier& clickable(std::function<void()> cb) {
+        onClick_ = std::move(cb);
+        return *this;
+    }
+
+    // —— 圆角 ——
+    Modifier& roundedCorner(float radius) {
+        roundedCorner_ = radius;
+        return *this;
+    }
+
     // —— 透明度 ——
     Modifier& alpha(float a) {
         alpha_ = a;
@@ -101,7 +115,9 @@ public:
     int borderWidth_ = 0;
     ::Color borderColor_ = BLANK;
     float alpha_ = 1.0f;
+    float roundedCorner_ = 0.0f; // 0 = 直角
     bool clip_ = false;
+    std::function<void()> onClick_; // clickable 回调
 };
 
 } // namespace sgui

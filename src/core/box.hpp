@@ -29,10 +29,12 @@ public:
 
     void render(RenderContext& ctx) override;
     Size measure() const override;
+    bool onMouseDown(int x, int y) override;
 
 private:
     std::vector<std::shared_ptr<Widget>> children_;
     Alignment2D contentAlignment_ = Alignment2D::TopStart;
+    Rectangle bounds_{}; // 最近一次 render 的 bounding rect
 };
 
 } // namespace sgui

@@ -37,14 +37,19 @@ void Window::run(const std::function<void()>& renderFunc) {
 
 void Window::run(std::shared_ptr<Widget> rootWidget) {
     while (!WindowShouldClose()) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            Vector2 mouse = GetMousePosition();
+            rootWidget->onMouseDown((int)mouse.x, (int)mouse.y);
+        }
+
         BeginDrawing();
         ClearBackground(bgColor_);
-        
+
         if (rootWidget) {
             RenderContext ctx{0, 0, width_, height_};
             rootWidget->render(ctx);
         }
-        
+
         EndDrawing();
     }
 }

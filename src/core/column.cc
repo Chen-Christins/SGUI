@@ -51,18 +51,29 @@ void Column::render(RenderContext& ctx) {
     int finalWidth = modifier.width_ > 0 ? modifier.width_ : (modifier.fillMaxWidth_ ? ctx.maxWidth : rawSize.width);
     int finalHeight = modifier.height_ > 0 ? modifier.height_ : (modifier.fillMaxHeight_ ? ctx.maxHeight : rawSize.height);
 
+    bounds_ = {(float)ctx.x, (float)ctx.y, (float)finalWidth, (float)finalHeight};
+
     // 背景
     if (modifier.backgroundColor_.a > 0) {
-        DrawRectangle(ctx.x, ctx.y, finalWidth, finalHeight, modifier.backgroundColor_);
+        if (modifier.roundedCorner_ > 0) {
+            DrawRectangleRounded(
+                {(float)ctx.x, (float)ctx.y, (float)finalWidth, (float)finalHeight},
+                modifier.roundedCorner_, 8, modifier.backgroundColor_);
+        } else {
+            DrawRectangle(ctx.x, ctx.y, finalWidth, finalHeight, modifier.backgroundColor_);
+        }
     }
     // 边框
     if (modifier.borderWidth_ > 0 && modifier.borderColor_.a > 0) {
-        DrawRectangleLinesEx({
-            (float)ctx.x,
-            (float)ctx.y,
-            (float)finalWidth,
-            (float)finalHeight
-        }, (float)modifier.borderWidth_, modifier.borderColor_);
+        if (modifier.roundedCorner_ > 0) {
+            DrawRectangleRoundedLines(
+                {(float)ctx.x, (float)ctx.y, (float)finalWidth, (float)finalHeight},
+                modifier.roundedCorner_, 8, (float)modifier.borderWidth_, modifier.borderColor_);
+        } else {
+            DrawRectangleLinesEx({
+                (float)ctx.x, (float)ctx.y, (float)finalWidth, (float)finalHeight
+            }, (float)modifier.borderWidth_, modifier.borderColor_);
+        }
     }
 
     // 内容区域（扣除 padding）
@@ -143,7 +154,8 @@ void Column::render(RenderContext& ctx) {
 
         child->render(childCtx);
 
-        currentY += childSize.height + gap;
+        int childH = child->isFillMaxHeight() ? cH : childSize.height;
+        currentY += childH + gap;
     }
 }
 
@@ -159,7 +171,26 @@ Size Column::measure() const {
         size.width = std::max(size.width, childSize.width);
         first = false;
     }
+    if (modifier.width_ > 0) {
+        size.width = modifier.width_;
+    }
+    if (modifier.height_ > 0) {
+        size.height = modifier.height_;
+    }
     return size;
+}
+
+bool Column::onMouseDown(int x, int y) {
+    for (auto it = children_.rbegin(); it != children_.rend(); ++it) {
+        if ((*it)->onMouseDown(x, y)) {
+            return true;
+        }
+    }
+    if (modifier.onClick_ && hitTestRoundedRect(x, y, bounds_, modifier.roundedCorner_)) {
+        modifier.onClick_();
+        return true;
+    }
+    return false;
 }
 
 } // namespace sgui
