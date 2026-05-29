@@ -11,34 +11,31 @@
 #include "alignment.hpp"
 #include <vector>
 #include <memory>
+#include <initializer_list>
 
 namespace sgui {
 
 class Row : public Widget {
 public:
+    static std::shared_ptr<Row> create(
+        Modifier mod = {},
+        Arrangement horizontalArrangement = Arrangement::Start,
+        Alignment verticalAlignment = Alignment::Start,
+        std::initializer_list<std::shared_ptr<Widget>> children = {}
+    );
+
     Row& addChild(std::shared_ptr<Widget> child);
     Row& setSpacing(int spacing);
-    
-    // 类似于 Compose 的 modifier
-    Row& fillMaxWidth(bool fill = true);
-    Row& fillMaxHeight(bool fill = true);
-    
-    // 主轴排列规则 (Arrangement.Start / Center / End ...)
+
     Row& setHorizontalArrangement(Arrangement arr);
-    // 交叉轴对齐规则 (Alignment.Top / CenterVertically ...)
     Row& setVerticalAlignment(Alignment align);
 
     void render(RenderContext& ctx) override;
     Size measure() const override;
 
-    bool isFillMaxWidth() const override { return fillMaxWidth_; }
-    bool isFillMaxHeight() const override { return fillMaxHeight_; }
-
 private:
     std::vector<std::shared_ptr<Widget>> children_;
     int spacing_ = 0;
-    bool fillMaxWidth_ = false;
-    bool fillMaxHeight_ = false;
     Arrangement horizontalArrangement_ = Arrangement::Start;
     Alignment verticalAlignment_ = Alignment::Start;
 };

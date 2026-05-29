@@ -31,24 +31,37 @@ int main() {
     auto text3 = std::make_shared<sgui::Text>("End");
     text3->setFontSize(24).setColor(ORANGE).loadFont("./assets/fonts/NotoSansCJKsc-Regular.otf");
 
-    // 2. 构建 Row，演示主轴等距排列 (SpaceEvenly) 和交叉轴居中对齐 (Center)
-    auto row = std::make_shared<sgui::Row>();
-    row->fillMaxWidth(true)
-        .setHorizontalArrangement(sgui::Arrangement::SpaceBetween)
-        .setVerticalAlignment(sgui::Alignment::Center)
-        .addChild(text1)
-        .addChild(text2)
-        .addChild(text3);
+    // 2. 构建 Row，Modifier 设置 fill 属性，后面跟布局专属参数和子组件
+    auto row = sgui::Row::create(
+        sgui::Modifier().fillMaxWidth(),
+        sgui::Arrangement::SpaceAround,
+        sgui::Alignment::Center,
+        {
+            text1,
+            text2,
+            text3
+        }
+    );
 
-    // 3. 构建 Column，作为根，自动撑满并全局居中
-    auto column = std::make_shared<sgui::Column>();
-    column->fillMaxWidth(true)
-          .fillMaxHeight(true)
-          .setVerticalArrangement(sgui::Arrangement::End)
-          .setHorizontalAlignment(sgui::Alignment::Start) // 内部组件都在主轴上居中
-          .addChild(title)
-        //   .addChild(std::make_shared<sgui::Spacer>(0, 60)) // Spacer 产生 60px 的垂直间距
-          .addChild(row);
+    // 3. 构建 Box 包裹标题，演示 2D 内容居中
+    auto titleBox = sgui::Box::create(
+        sgui::Modifier().fillMaxWidth(),
+        sgui::Alignment2D::Center,
+        {
+            title
+        }
+    );
+
+    // 4. 构建 Column 根节点，Modifier 设满宽高
+    auto column = sgui::Column::create(
+        sgui::Modifier().fillMaxSize(),
+        sgui::Arrangement::SpaceAround,
+        sgui::Alignment::End,
+        {
+            titleBox,
+            row
+        }
+    );
 
     app.run([&]() {
         // 直接传递根组件的 RenderContext（0, 0 坐标，窗口宽高）

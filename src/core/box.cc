@@ -3,20 +3,24 @@
 
 namespace sgui {
 
+std::shared_ptr<Box> Box::create(
+    Modifier mod,
+    Alignment2D contentAlignment,
+    std::initializer_list<std::shared_ptr<Widget>> children
+) {
+    auto box = std::make_shared<Box>();
+    box->modifier = mod;
+    box->setContentAlignment(contentAlignment);
+    for (const auto& child : children) {
+        box->addChild(child);
+    }
+    return box;
+}
+
 Box& Box::addChild(std::shared_ptr<Widget> child) {
     if (child) {
         children_.push_back(std::move(child));
     }
-    return *this;
-}
-
-Box& Box::fillMaxWidth(bool fill) {
-    fillMaxWidth_ = fill;
-    return *this;
-}
-
-Box& Box::fillMaxHeight(bool fill) {
-    fillMaxHeight_ = fill;
     return *this;
 }
 
@@ -27,8 +31,8 @@ Box& Box::setContentAlignment(Alignment2D align) {
 
 void Box::render(RenderContext& ctx) {
     Size rawSize = measure();
-    int finalWidth = fillMaxWidth_ ? ctx.maxWidth : rawSize.width;
-    int finalHeight = fillMaxHeight_ ? ctx.maxHeight : rawSize.height;
+    int finalWidth = modifier.fillMaxWidth_ ? ctx.maxWidth : rawSize.width;
+    int finalHeight = modifier.fillMaxHeight_ ? ctx.maxHeight : rawSize.height;
 
     for (auto& child : children_) {
         Size childSize = child->measure();

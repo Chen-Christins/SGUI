@@ -8,6 +8,7 @@
 #pragma once
 
 #include <raylib.h>
+#include "modifier.hpp"
 
 namespace sgui {
 
@@ -29,8 +30,11 @@ public:
     virtual void render(RenderContext& ctx) = 0;
     virtual Size measure() const { return {}; }
     
-    virtual bool isFillMaxWidth() const { return false; }
-    virtual bool isFillMaxHeight() const { return false; }
+    // 直接代理读取 Modifier 里的属性
+    bool isFillMaxWidth() const { return modifier.fillMaxWidth_; }
+    bool isFillMaxHeight() const { return modifier.fillMaxHeight_; }
+    
+    Modifier modifier; // 提取出来的修饰器
 };
 
 } // namespace sgui

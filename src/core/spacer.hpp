@@ -1,6 +1,6 @@
 /**
  * @file spacer.hpp
- * @brief 占位组件 (类似 Jetpack Compose 的 Spacer)
+ * @brief 占位组件
  * @author Christins (chen.christins@qq.com)
  * @copyright Apache 2.0
  */

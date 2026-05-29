@@ -3,6 +3,22 @@
 
 namespace sgui {
 
+std::shared_ptr<Row> Row::create(
+    Modifier mod,
+    Arrangement horizontalArrangement,
+    Alignment verticalAlignment,
+    std::initializer_list<std::shared_ptr<Widget>> children
+) {
+    auto row = std::make_shared<Row>();
+    row->modifier = mod;
+    row->setHorizontalArrangement(horizontalArrangement);
+    row->setVerticalAlignment(verticalAlignment);
+    for (const auto& child : children) {
+        row->addChild(child);
+    }
+    return row;
+}
+
 Row& Row::addChild(std::shared_ptr<Widget> child) {
     if (child) {
         children_.push_back(std::move(child));
@@ -12,16 +28,6 @@ Row& Row::addChild(std::shared_ptr<Widget> child) {
 
 Row& Row::setSpacing(int spacing) {
     spacing_ = spacing;
-    return *this;
-}
-
-Row& Row::fillMaxWidth(bool fill) {
-    fillMaxWidth_ = fill;
-    return *this;
-}
-
-Row& Row::fillMaxHeight(bool fill) {
-    fillMaxHeight_ = fill;
     return *this;
 }
 
@@ -39,8 +45,8 @@ void Row::render(RenderContext& ctx) {
     if (children_.empty()) return;
 
     Size rawSize = measure();
-    int finalWidth = fillMaxWidth_ ? ctx.maxWidth : rawSize.width;
-    int finalHeight = fillMaxHeight_ ? ctx.maxHeight : rawSize.height;
+    int finalWidth = modifier.fillMaxWidth_ ? ctx.maxWidth : rawSize.width;
+    int finalHeight = modifier.fillMaxHeight_ ? ctx.maxHeight : rawSize.height;
 
     int freeSpace = finalWidth - rawSize.width;
     if (freeSpace < 0) freeSpace = 0;

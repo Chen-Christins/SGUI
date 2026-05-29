@@ -3,6 +3,22 @@
 
 namespace sgui {
 
+std::shared_ptr<Column> Column::create(
+    Modifier mod,
+    Arrangement verticalArrangement,
+    Alignment horizontalAlignment,
+    std::initializer_list<std::shared_ptr<Widget>> children
+) {
+    auto col = std::make_shared<Column>();
+    col->modifier = mod;
+    col->setVerticalArrangement(verticalArrangement);
+    col->setHorizontalAlignment(horizontalAlignment);
+    for (const auto& child : children) {
+        col->addChild(child);
+    }
+    return col;
+}
+
 Column& Column::addChild(std::shared_ptr<Widget> child) {
     if (child) {
         children_.push_back(std::move(child));
@@ -12,16 +28,6 @@ Column& Column::addChild(std::shared_ptr<Widget> child) {
 
 Column& Column::setSpacing(int spacing) {
     spacing_ = spacing;
-    return *this;
-}
-
-Column& Column::fillMaxWidth(bool fill) {
-    fillMaxWidth_ = fill;
-    return *this;
-}
-
-Column& Column::fillMaxHeight(bool fill) {
-    fillMaxHeight_ = fill;
     return *this;
 }
 
@@ -36,14 +42,18 @@ Column& Column::setHorizontalAlignment(Alignment align) {
 }
 
 void Column::render(RenderContext& ctx) {
-    if (children_.empty()) return;
+    if (children_.empty()) {
+        return;
+    }
 
     Size rawSize = measure();
-    int finalWidth = fillMaxWidth_ ? ctx.maxWidth : rawSize.width;
-    int finalHeight = fillMaxHeight_ ? ctx.maxHeight : rawSize.height;
+    int finalWidth = modifier.fillMaxWidth_ ? ctx.maxWidth : rawSize.width;
+    int finalHeight = modifier.fillMaxHeight_ ? ctx.maxHeight : rawSize.height;
 
     int freeSpace = finalHeight - rawSize.height;
-    if (freeSpace < 0) freeSpace = 0;
+    if (freeSpace < 0) {
+        freeSpace = 0;
+    }
 
     int startY = ctx.y;
     int gap = spacing_;
