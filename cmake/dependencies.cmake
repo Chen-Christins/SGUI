@@ -10,6 +10,11 @@ FetchContent_Declare(
 )
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
+
+# 消除 Raylib 中的 CMake 弃用警告和开发者警告 (macOS OpenGL)
+set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
+set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS ON CACHE BOOL "" FORCE)
+
 FetchContent_MakeAvailable(raylib)
 
 # Suppress warnings from third-party raylib
