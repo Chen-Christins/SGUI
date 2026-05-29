@@ -1,7 +1,5 @@
 #include "widget.h"
 #include "composition_local.h"
-#include "layout.h"
-#include "modifier.h"
 
 namespace sgui {
 
