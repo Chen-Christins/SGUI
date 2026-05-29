@@ -31,62 +31,80 @@ Box& Box::setContentAlignment(Alignment2D align) {
 
 void Box::render(RenderContext& ctx) {
     Size rawSize = measure();
-    int finalWidth = modifier.fillMaxWidth_ ? ctx.maxWidth : rawSize.width;
-    int finalHeight = modifier.fillMaxHeight_ ? ctx.maxHeight : rawSize.height;
+    // 显式尺寸 > fillMax > 测量值
+    int finalWidth = modifier.width_ > 0 ? modifier.width_ :
+                     (modifier.fillMaxWidth_ ? ctx.maxWidth : rawSize.width);
+    int finalHeight = modifier.height_ > 0 ? modifier.height_ :
+                      (modifier.fillMaxHeight_ ? ctx.maxHeight : rawSize.height);
 
+    // 背景
     if (modifier.backgroundColor_.a > 0) {
         DrawRectangle(ctx.x, ctx.y, finalWidth, finalHeight, modifier.backgroundColor_);
     }
+    // 边框
+    if (modifier.borderWidth_ > 0 && modifier.borderColor_.a > 0) {
+        DrawRectangleLinesEx(
+            {(float)ctx.x, (float)ctx.y, (float)finalWidth, (float)finalHeight},
+            (float)modifier.borderWidth_, modifier.borderColor_);
+    }
+
+    // 内容区域（扣除 padding）
+    int cX = ctx.x + modifier.paddingLeft_;
+    int cY = ctx.y + modifier.paddingTop_;
+    int cW = finalWidth - modifier.paddingLeft_ - modifier.paddingRight_;
+    int cH = finalHeight - modifier.paddingTop_ - modifier.paddingBottom_;
+    if (cW < 0) cW = 0;
+    if (cH < 0) cH = 0;
 
     for (auto& child : children_) {
         Size childSize = child->measure();
-        int cWidth = child->isFillMaxWidth() ? finalWidth : childSize.width;
-        int cHeight = child->isFillMaxHeight() ? finalHeight : childSize.height;
-        
+        int cChildW = child->isFillMaxWidth() ? cW : childSize.width;
+        int cChildH = child->isFillMaxHeight() ? cH : childSize.height;
+
         RenderContext childCtx = ctx;
 
-        // 根据 2D 对齐方式计算子组件的起始位置
+        // 根据 2D 对齐方式计算子组件在内容区域内的起始位置
         switch (contentAlignment_) {
             case Alignment2D::TopStart:
-                childCtx.x = ctx.x;
-                childCtx.y = ctx.y;
+                childCtx.x = cX;
+                childCtx.y = cY;
                 break;
             case Alignment2D::TopCenter:
-                childCtx.x = ctx.x + (finalWidth - cWidth) / 2;
-                childCtx.y = ctx.y;
+                childCtx.x = cX + (cW - cChildW) / 2;
+                childCtx.y = cY;
                 break;
             case Alignment2D::TopEnd:
-                childCtx.x = ctx.x + (finalWidth - cWidth);
-                childCtx.y = ctx.y;
+                childCtx.x = cX + (cW - cChildW);
+                childCtx.y = cY;
                 break;
             case Alignment2D::CenterStart:
-                childCtx.x = ctx.x;
-                childCtx.y = ctx.y + (finalHeight - cHeight) / 2;
+                childCtx.x = cX;
+                childCtx.y = cY + (cH - cChildH) / 2;
                 break;
             case Alignment2D::Center:
-                childCtx.x = ctx.x + (finalWidth - cWidth) / 2;
-                childCtx.y = ctx.y + (finalHeight - cHeight) / 2;
+                childCtx.x = cX + (cW - cChildW) / 2;
+                childCtx.y = cY + (cH - cChildH) / 2;
                 break;
             case Alignment2D::CenterEnd:
-                childCtx.x = ctx.x + (finalWidth - cWidth);
-                childCtx.y = ctx.y + (finalHeight - cHeight) / 2;
+                childCtx.x = cX + (cW - cChildW);
+                childCtx.y = cY + (cH - cChildH) / 2;
                 break;
             case Alignment2D::BottomStart:
-                childCtx.x = ctx.x;
-                childCtx.y = ctx.y + (finalHeight - cHeight);
+                childCtx.x = cX;
+                childCtx.y = cY + (cH - cChildH);
                 break;
             case Alignment2D::BottomCenter:
-                childCtx.x = ctx.x + (finalWidth - cWidth) / 2;
-                childCtx.y = ctx.y + (finalHeight - cHeight);
+                childCtx.x = cX + (cW - cChildW) / 2;
+                childCtx.y = cY + (cH - cChildH);
                 break;
             case Alignment2D::BottomEnd:
-                childCtx.x = ctx.x + (finalWidth - cWidth);
-                childCtx.y = ctx.y + (finalHeight - cHeight);
+                childCtx.x = cX + (cW - cChildW);
+                childCtx.y = cY + (cH - cChildH);
                 break;
         }
-        
-        childCtx.maxWidth = ctx.maxWidth - (childCtx.x - ctx.x);
-        childCtx.maxHeight = ctx.maxHeight - (childCtx.y - ctx.y);
+
+        childCtx.maxWidth = cW - (childCtx.x - cX);
+        childCtx.maxHeight = cH - (childCtx.y - cY);
 
         child->render(childCtx);
     }

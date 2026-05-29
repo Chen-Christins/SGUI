@@ -12,6 +12,7 @@
 #include <core/box.hpp>
 #include <core/spacer.hpp>
 #include <core/alignment.hpp>
+#include <core/units.hpp>
 #include <memory>
 
 int main() {
@@ -31,13 +32,15 @@ int main() {
     auto text3 = std::make_shared<sgui::Text>("End");
     text3->setFontSize(24).setColor(ORANGE).loadFont("./assets/fonts/NotoSansCJKsc-Regular.otf");
 
-    // 2. 构建 Row，Modifier 设置 fill 属性，后面跟布局专属参数和子组件
+    // 2. 构建 Row，用 dp() 函数设置 padding + border（无需 using）
     auto row = sgui::Row::create(
         sgui::Modifier()
-            .fillMaxWidth()
+            .padding(sgui::dp(40), sgui::dp(8))
+            .fillMaxSize()
+            // .height(sgui::dp(40))
             .background(YELLOW),
-        sgui::Arrangement::SpaceAround,
-        sgui::Alignment::Center,
+        sgui::Arrangement::SpaceBetween,
+        sgui::Alignment::End,
         {
             text1,
             text2,
@@ -49,7 +52,8 @@ int main() {
     auto titleBox = sgui::Box::create(
         sgui::Modifier()
             .fillMaxWidth()
-            .background(BLUE),
+            .background(BLUE)
+            .alpha(0.1f),
         sgui::Alignment2D::Center,
         {
             title
@@ -60,7 +64,7 @@ int main() {
     auto column = sgui::Column::create(
         sgui::Modifier()
             .fillMaxSize(),
-        sgui::Arrangement::SpaceAround,
+        sgui::Arrangement::Start,
         sgui::Alignment::End,
         {
             titleBox,

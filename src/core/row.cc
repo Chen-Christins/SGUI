@@ -45,17 +45,35 @@ void Row::render(RenderContext& ctx) {
     if (children_.empty()) return;
 
     Size rawSize = measure();
-    int finalWidth = modifier.fillMaxWidth_ ? ctx.maxWidth : rawSize.width;
-    int finalHeight = modifier.fillMaxHeight_ ? ctx.maxHeight : rawSize.height;
+    // 显式尺寸 > fillMax > 测量值
+    int finalWidth = modifier.width_ > 0 ? modifier.width_ :
+                     (modifier.fillMaxWidth_ ? ctx.maxWidth : rawSize.width);
+    int finalHeight = modifier.height_ > 0 ? modifier.height_ :
+                      (modifier.fillMaxHeight_ ? ctx.maxHeight : rawSize.height);
 
+    // 背景
     if (modifier.backgroundColor_.a > 0) {
         DrawRectangle(ctx.x, ctx.y, finalWidth, finalHeight, modifier.backgroundColor_);
     }
+    // 边框
+    if (modifier.borderWidth_ > 0 && modifier.borderColor_.a > 0) {
+        DrawRectangleLinesEx(
+            {(float)ctx.x, (float)ctx.y, (float)finalWidth, (float)finalHeight},
+            (float)modifier.borderWidth_, modifier.borderColor_);
+    }
 
-    int freeSpace = finalWidth - rawSize.width;
+    // 内容区域（扣除 padding）
+    int cX = ctx.x + modifier.paddingLeft_;
+    int cY = ctx.y + modifier.paddingTop_;
+    int cW = finalWidth - modifier.paddingLeft_ - modifier.paddingRight_;
+    int cH = finalHeight - modifier.paddingTop_ - modifier.paddingBottom_;
+    if (cW < 0) cW = 0;
+    if (cH < 0) cH = 0;
+
+    int freeSpace = cW - rawSize.width;
     if (freeSpace < 0) freeSpace = 0;
 
-    int startX = ctx.x;
+    int startX = cX;
     int gap = spacing_;
 
     // 主轴（水平）处理
@@ -88,24 +106,23 @@ void Row::render(RenderContext& ctx) {
     int currentX = startX;
     for (auto& child : children_) {
         Size childSize = child->measure();
-        int cHeight = child->isFillMaxHeight() ? finalHeight : childSize.height;
-        
+        int cChildH = child->isFillMaxHeight() ? cH : childSize.height;
+
         RenderContext childCtx = ctx;
         childCtx.x = currentX;
-        
+
         // 交叉轴（垂直）处理
         switch (verticalAlignment_) {
-            case Alignment::Start: childCtx.y = ctx.y; break;
-            case Alignment::Center: childCtx.y = ctx.y + (finalHeight - cHeight) / 2; break;
-            case Alignment::End: childCtx.y = ctx.y + (finalHeight - cHeight); break;
+            case Alignment::Start: childCtx.y = cY; break;
+            case Alignment::Center: childCtx.y = cY + (cH - cChildH) / 2; break;
+            case Alignment::End: childCtx.y = cY + (cH - cChildH); break;
         }
 
-        // 重要：更新子组件剩余的可用边界（防止截断和越界外溢）
-        childCtx.maxWidth = ctx.maxWidth - (childCtx.x - ctx.x);
-        childCtx.maxHeight = ctx.maxHeight - (childCtx.y - ctx.y);
-        
+        childCtx.maxWidth = cW - (childCtx.x - cX);
+        childCtx.maxHeight = cH - (childCtx.y - cY);
+
         child->render(childCtx);
-        
+
         currentX += childSize.width + gap;
     }
 }
