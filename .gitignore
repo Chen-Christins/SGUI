@@ -3,3 +3,4 @@ build
 .cache
 bin
 lib
+.DS_Store

@@ -21,12 +21,9 @@ public:
     ~Window();
 
     void setTargetFPS(int fps);
-    void setBackgroundColor(Color color); // raylib的Color
+    void setBackgroundColor(Color color);
 
-    // 用法 1：立即调用模式 (传入每次循环需要执行的渲染逻辑)
     void run(const std::function<void()>& renderFunc);
-
-    // 用法 2：保留模式 (挂载一个根组件，Window自动调用其 render 和 measure)
     void run(std::shared_ptr<Widget> rootWidget);
 
 private:

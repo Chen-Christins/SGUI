@@ -7,6 +7,8 @@ Window::Window(int width, int height, const std::string& title)
     , height_(height)
     , title_(title) {
     SetTraceLogLevel(LOG_WARNING);
+    // 同时开启 MSAA 和 Mac 视网膜高清屏(HighDPI)支持，这是解决 Mac 模糊的核心
+    SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_HIGHDPI);
     InitWindow(width_, height_, title_.c_str());
 }
 
