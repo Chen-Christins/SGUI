@@ -18,10 +18,14 @@ namespace sgui {
 class Window : public NoCopyable {
 public:
     Window(int width, int height, const std::string& title);
+    Window(int width, int height, int minWidth, int minHeight, int maxWidth, int maxHeight, const std::string& title);
     ~Window();
 
     void setTargetFPS(int fps);
     void setBackgroundColor(Color color);
+    
+    void setMinSize(int width, int height);
+    void setMaxSize(int width, int height);
 
     void run(const std::function<void()>& renderFunc);
     void run(std::shared_ptr<Widget> rootWidget);

@@ -19,26 +19,34 @@
 #include <memory>
 
 int main() {
-    sgui::Window app(800, 600, "SGUI Layout Test");
+    sgui::Window app(800, 600, 400, 300, 1200, 900, "SGUI Layout Test");
     app.setTargetFPS(60);
 
     // 1. 创建各个文本组件（此处每个组件内部自动提取自己文本的码位并加载支持高清防锯齿的字体）
     auto title = std::make_shared<sgui::Text>("SGUI 现代布局系统测试 / Layout Test");
-    title->setFontSize(36).setColor(DARKBLUE).setSpacing(2.0f).loadFont("./assets/fonts/NotoSansCJKsc-Regular.otf");
+    title->setFontSize(36)
+        .setColor(DARKBLUE)
+        .setSpacing(2.0f)
+        .loadFont("./assets/fonts/NotoSansCJKsc-Regular.otf");
 
     auto text1 = std::make_shared<sgui::Text>("Start");
-    text1->setFontSize(24).setColor(RED).loadFont("./assets/fonts/NotoSansCJKsc-Regular.otf");
+    text1->setFontSize(24)
+        .setColor(RED)
+        .loadFont("./assets/fonts/NotoSansCJKsc-Regular.otf");
     
     auto text2 = std::make_shared<sgui::Text>("Center");
-    text2->setFontSize(24).setColor(DARKGREEN).loadFont("./assets/fonts/NotoSansCJKsc-Regular.otf");
+    text2->setFontSize(24)
+        .setColor(DARKGREEN)
+        .loadFont("./assets/fonts/NotoSansCJKsc-Regular.otf");
     
     auto text3 = std::make_shared<sgui::Text>("End");
-    text3->setFontSize(24).setColor(ORANGE).loadFont("./assets/fonts/NotoSansCJKsc-Regular.otf");
+    text3->setFontSize(24)
+        .setColor(ORANGE)
+        .loadFont("./assets/fonts/NotoSansCJKsc-Regular.otf");
 
     // 2. 构建 Row，用 dp() 函数设置 padding + border（无需 using）
     auto row = sgui::Row::create(
         sgui::Modifier()
-            // .padding(sgui::dp(40), sgui::dp(8))
             .fillMaxWidth()
             .height(sgui::dp(40))
             .background(YELLOW),
@@ -56,9 +64,6 @@ int main() {
         sgui::Modifier()
             .fillMaxWidth()
             .background(BLUE)
-            .clickable([] { 
-                std::cout << "titleBox clicked!" << std::endl;
-            })
             .alpha(0.1f),
         sgui::Alignment2D::Center,
         {
@@ -68,28 +73,33 @@ int main() {
 
     // 4. 构建 Button，类似 Compose 的 Button 组件
     auto btnText = std::make_shared<sgui::Text>("Click Me");
-    btnText->setFontSize(24).setColor(RAYWHITE).loadFont("./assets/fonts/NotoSansCJKsc-Regular.otf");
+    btnText->setFontSize(24)
+        .setColor(RAYWHITE)
+        .loadFont("./assets/fonts/NotoSansCJKsc-Regular.otf");
 
     auto button = sgui::Button::create(
         sgui::Modifier()
             .background(DARKBLUE)
-            .roundedCorner(8.0f)
-            .padding(sgui::dp(24), sgui::dp(12)),
+            .roundedCorner(0.35f)
+            .padding(sgui::dp(15), sgui::dp(8)),
         btnText,
         []() {
             std::cout << "Button clicked!" << std::endl;
         }
     );
 
+    auto spacer = std::make_shared<sgui::Spacer>(0, sgui::dp(20));
+
     // 5. 构建 Column 根节点，Modifier 设满宽高
     auto column = sgui::Column::create(
         sgui::Modifier()
             .fillMaxSize(),
         sgui::Arrangement::Start,
-        sgui::Alignment::End,
+        sgui::Alignment::Center,
         {
             titleBox,
             row,
+            spacer,
             button
         }
     );

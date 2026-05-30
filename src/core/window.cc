@@ -7,9 +7,21 @@ Window::Window(int width, int height, const std::string& title)
     , height_(height)
     , title_(title) {
     SetTraceLogLevel(LOG_WARNING);
-    // 同时开启 MSAA 和 Mac 视网膜高清屏(HighDPI)支持，这是解决 Mac 模糊的核心
-    SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_HIGHDPI);
+    // 同时开启 MSAA 和 Mac 视网膜高清屏(HighDPI)支持，以及允许缩放
+    SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE);
     InitWindow(width_, height_, title_.c_str());
+}
+
+Window::Window(int width, int height, int minWidth, int minHeight, int maxWidth, int maxHeight, const std::string& title)
+    : width_(width)
+    , height_(height)
+    , title_(title) {
+    SetTraceLogLevel(LOG_WARNING);
+    // 同时开启 MSAA 和 Mac 视网膜高清屏(HighDPI)支持，以及允许缩放
+    SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE);
+    InitWindow(width_, height_, title_.c_str());
+    SetWindowMinSize(minWidth, minHeight);
+    SetWindowMaxSize(maxWidth, maxHeight);
 }
 
 Window::~Window() {
@@ -22,6 +34,14 @@ void Window::setTargetFPS(int fps) {
 
 void Window::setBackgroundColor(Color color) {
     bgColor_ = color;
+}
+
+void Window::setMinSize(int width, int height) {
+    SetWindowMinSize(width, height);
+}
+
+void Window::setMaxSize(int width, int height) {
+    SetWindowMaxSize(width, height);
 }
 
 void Window::run(const std::function<void()>& renderFunc) {
@@ -46,7 +66,7 @@ void Window::run(std::shared_ptr<Widget> rootWidget) {
         ClearBackground(bgColor_);
 
         if (rootWidget) {
-            RenderContext ctx{0, 0, width_, height_};
+            RenderContext ctx{0, 0, GetScreenWidth(), GetScreenHeight()};
             rootWidget->render(ctx);
         }
 
