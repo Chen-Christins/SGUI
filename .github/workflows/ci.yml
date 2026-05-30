@@ -30,7 +30,7 @@ jobs:
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
-        run: cmake --build build --config ${{ matrix.build_type }}
+        run: cmake --build build --target sgui --config ${{ matrix.build_type }}
 
       - name: Set package name
         id: name
@@ -42,19 +42,47 @@ jobs:
             VERSION="latest"
           fi
           OS=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
-          echo "pkg=SGUI-${VERSION}-${OS}" >> $GITHUB_OUTPUT
+          echo "pkg=SGUI-Framework-${VERSION}-${OS}" >> $GITHUB_OUTPUT
 
       - name: Package (Linux/macOS)
         if: runner.os != 'Windows'
+        shell: bash
         run: |
-          cd build
-          zip "../${{ steps.name.outputs.pkg }}.zip" SGUI
+          mkdir -p pkg/include pkg/lib
+
+          find src -name '*.h' | while read f; do
+            dst="pkg/include/${f#src/}"
+            mkdir -p "$(dirname "$dst")"
+            cp "$f" "$dst"
+          done
+
+          # All static libraries (sgui + raylib) go to lib/ via CMAKE_ARCHIVE_OUTPUT_DIRECTORY
+          cp lib/lib*.a pkg/lib/ 2>/dev/null || \
+          cp lib/Release/lib*.a pkg/lib/ 2>/dev/null || \
+          { echo "ERROR: no .a files found in lib/"; exit 1; }
+
+          mv pkg "${{ steps.name.outputs.pkg }}"
+          zip -r "${{ steps.name.outputs.pkg }}.zip" "${{ steps.name.outputs.pkg }}"
 
       - name: Package (Windows)
         if: runner.os == 'Windows'
+        shell: pwsh
         run: |
-          cd build
-          Compress-Archive -Path Release/SGUI.exe -DestinationPath "../${{ steps.name.outputs.pkg }}.zip"
+          New-Item -ItemType Directory -Force -Path pkg/include, pkg/lib | Out-Null
+
+          Get-ChildItem -Path src -Recurse -Filter *.h | ForEach-Object {
+            $dst = "pkg/include/$($_.FullName.Substring($PWD.Path.Length + 5))"
+            New-Item -ItemType Directory -Force -Path (Split-Path $dst) | Out-Null
+            Copy-Item $_.FullName $dst
+          }
+
+          # All static libraries (sgui + raylib) go to lib/ via CMAKE_ARCHIVE_OUTPUT_DIRECTORY
+          if (Test-Path lib/*.lib)             { Copy-Item lib/*.lib pkg/lib/ }
+          elseif (Test-Path lib/Release/*.lib) { Copy-Item lib/Release/*.lib pkg/lib/ }
+          else { throw "no .lib files found in lib/" }
+
+          Rename-Item pkg "${{ steps.name.outputs.pkg }}"
+          Compress-Archive -Path "${{ steps.name.outputs.pkg }}" -DestinationPath "${{ steps.name.outputs.pkg }}.zip"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -74,7 +102,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: SGUI-${{ github.ref_name }}-*
+          pattern: SGUI-Framework-${{ github.ref_name }}-*
           merge-multiple: true
           path: artifacts
 

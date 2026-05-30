@@ -1,30 +1,30 @@
 cmake_minimum_required(VERSION 3.14)
 project(SGUI)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Choose the type of build." FORCE)
+endif()
 
+include(cmake/common.cmake)
+include(cmake/dependencies.cmake)
 
-# Fetch raylib for rendering
-# Add policy bypass for Raylib 5.0 CMake requirement error
-set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
-
-include(FetchContent)
-FetchContent_Declare(
-  raylib
-  GIT_REPOSITORY https://gitee.com/mirrors/raylib.git
-  GIT_TAG 5.0 # Use stable 5.0 release
-  GIT_SHALLOW ON # Make cloning much faster
-)
-set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(raylib)
-
-add_executable(SGUI 
-    src/main.cpp
+# Add the SGUI library
+add_library(sgui STATIC
+    src/core/text.cc
+    src/core/window.cc
+    src/core/row.cc
+    src/core/column.cc
+    src/core/box.cc
+    src/core/button.cc
+    src/core/spacer.cc
 )
 
-target_include_directories(SGUI PUBLIC include)
-target_link_libraries(SGUI PRIVATE raylib)
+target_include_directories(sgui PUBLIC src)
+target_link_libraries(sgui PUBLIC raylib)
+
+# ---- Tests ----
+add_executable(test_text tests/test_text.cc)
+target_link_libraries(test_text PRIVATE sgui)
