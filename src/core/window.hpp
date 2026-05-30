@@ -11,6 +11,7 @@
 #include "utils/nocopyable.hpp"
 
 #include <string>
+#include <memory>
 #include <functional>
 
 namespace sgui {
